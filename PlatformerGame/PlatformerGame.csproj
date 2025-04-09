@@ -46,22 +46,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MainForm.cs">
+    <Compile Include="GameStates\GameOverState.cs" />
+    <Compile Include="GameStates\PlayingState.cs" />
+    <Compile Include="GameStates\MainMenuState.cs" />
+    <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="GameObjects\GameTimer.cs" />
     <Compile Include="GameObjects\Level.cs" />
     <Compile Include="GameObjects\Player.cs" />
-    <Compile Include="GameStates\MainMenuState.cs" />
-    <Compile Include="GameStates\GameOverState.cs" />
-    <Compile Include="GameStates\PlayingState.cs" />
-    <Compile Include="GameStates\GameState.cs" />
+    <Compile Include="GameStates\IGameState.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -92,6 +92,8 @@
   <ItemGroup>
     <EmbeddedResource Include="back1.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Resourses\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

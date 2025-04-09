@@ -19,7 +19,7 @@ namespace PlatformerGame.GameObjects
 
         public Player(Rectangle startPlatform)
         {
-            sprite = new Bitmap("player.png");
+            sprite = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\player.png");
             Reset(startPlatform);
         }
 
@@ -43,8 +43,7 @@ namespace PlatformerGame.GameObjects
                 Position.X + 5,
                 Position.Y + Height,
                 Width - 10,
-                1
-            );
+                1);
 
             foreach (var platform in platforms)
             {

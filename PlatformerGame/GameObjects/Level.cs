@@ -49,7 +49,11 @@ namespace PlatformerGame.GameObjects
         {
             foreach (var platform in Platforms)
             {
-                g.FillRectangle(Brushes.Green, platform);
+                try
+                {
+                    g.FillRectangle(Brushes.Green, platform);
+                }
+                catch { /* игнорируем ошибки отрисовки */ }
             }
         }
     }

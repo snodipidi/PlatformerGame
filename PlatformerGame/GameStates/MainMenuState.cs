@@ -1,12 +1,77 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
+using System.Windows.Forms;
+using PlatformerGame.Forms;
 
 namespace PlatformerGame.GameStates
 {
-    internal class Class1
+    public class MainMenuState : IGameState
     {
+        private readonly MainForm _form;
+        private Rectangle _startButton;
+        private Rectangle _exitButton;
+        private readonly Font _titleFont = new Font("Arial", 48, FontStyle.Bold);
+        private readonly Font _buttonFont = new Font("Arial", 16, FontStyle.Bold);
+
+        public MainMenuState(MainForm form)
+        {
+            _form = form;
+            InitializeUI();
+        }
+
+        private void InitializeUI()
+        {
+            _startButton = new Rectangle(_form.ClientSize.Width / 2 - 100, 250, 200, 50);
+            _exitButton = new Rectangle(_form.ClientSize.Width / 2 - 100, 320, 200, 50);
+        }
+
+        public void Update() { }
+
+        public void Draw(Graphics g)
+        {
+            g.FillRectangle(new SolidBrush(Color.FromArgb(220, 0, 0, 0)),
+                new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height));
+
+            string title = "PLATFORMER";
+            var titleSize = g.MeasureString(title, _titleFont);
+            g.DrawString(title, _titleFont, Brushes.White,
+                (_form.ClientSize.Width - titleSize.Width) / 2, 100);
+
+            g.FillRectangle(Brushes.LightGreen, _startButton);
+            g.DrawRectangle(Pens.DarkGreen, _startButton);
+
+            g.FillRectangle(Brushes.LightCoral, _exitButton);
+            g.DrawRectangle(Pens.DarkRed, _exitButton);
+
+            var format = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
+
+            g.DrawString("START GAME", _buttonFont, Brushes.Black, _startButton, format);
+            g.DrawString("EXIT", _buttonFont, Brushes.Black, _exitButton, format);
+        }
+
+        public void HandleInput(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+                _form.StartNewGame();
+        }
+
+        public void HandleMouseClick(MouseEventArgs e)
+        {
+            if (_startButton.Contains(e.Location))
+            {
+                // Вызываем StartNewGame вместо ChangeState
+                _form.StartNewGame();
+            }
+            else if (_exitButton.Contains(e.Location))
+            {
+                _form.Close();
+            }
+        }
+
+        public void OnEnter() { }
+        public void OnExit() { }
     }
 }

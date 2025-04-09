@@ -1,6 +1,6 @@
-﻿namespace PlatformerGame
+﻿namespace PlatformerGame.Forms
 {
-    partial class Form1
+    partial class MainForm
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -17,17 +17,14 @@
         {
             this.SuspendLayout();
             // 
-            // Form1
+            // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1902, 1033);
-            this.DoubleBuffered = true;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.Name = "Form1";
+            this.ClientSize = new System.Drawing.Size(800, 600);
+            this.Name = "MainForm";
             this.Text = "Platformer Game";
             this.ResumeLayout(false);
-
         }
     }
 }
