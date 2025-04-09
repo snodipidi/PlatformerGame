@@ -55,7 +55,7 @@ namespace PlatformerGame.GameStates
                     _player.Jump();
                     break;
                 case Keys.Escape:
-                    _form.ChangeState(new MainMenuState(_form));
+                    _form.ShowMainMenu(); 
                     break;
             }
         }
@@ -67,7 +67,6 @@ namespace PlatformerGame.GameStates
 
         public void OnEnter()
         {
-            // Дополнительная инициализация при входе в состояние
             _form.Focus();
         }
 

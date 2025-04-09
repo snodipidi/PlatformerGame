@@ -54,15 +54,21 @@ namespace PlatformerGame.GameStates
         public void HandleInput(KeyEventArgs e)
         {
             if (e.KeyCode == Keys.R)
+            {
                 _form.StartNewGame();
+            }
             else if (e.KeyCode == Keys.Escape)
-                _form.ChangeState(new MainMenuState(_form));
+            {
+                _form.ShowMainMenu(); 
+            }
         }
 
         public void HandleMouseClick(MouseEventArgs e)
         {
             if (_retryButton.Contains(e.Location))
+            {
                 _form.StartNewGame();
+            }
         }
 
         public void OnEnter() { }

@@ -31,7 +31,7 @@ namespace PlatformerGame.GameStates
             g.FillRectangle(new SolidBrush(Color.FromArgb(220, 0, 0, 0)),
                 new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height));
 
-            string title = "PLATFORMER";
+            string title = "Platformer Game";
             var titleSize = g.MeasureString(title, _titleFont);
             g.DrawString(title, _titleFont, Brushes.White,
                 (_form.ClientSize.Width - titleSize.Width) / 2, 100);
@@ -48,26 +48,28 @@ namespace PlatformerGame.GameStates
                 LineAlignment = StringAlignment.Center
             };
 
-            g.DrawString("START GAME", _buttonFont, Brushes.Black, _startButton, format);
-            g.DrawString("EXIT", _buttonFont, Brushes.Black, _exitButton, format);
-        }
-
-        public void HandleInput(KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-                _form.StartNewGame();
+            g.DrawString("Играть", _buttonFont, Brushes.Black, _startButton, format);
+            g.DrawString("Выход", _buttonFont, Brushes.Black, _exitButton, format);
         }
 
         public void HandleMouseClick(MouseEventArgs e)
         {
             if (_startButton.Contains(e.Location))
             {
-                // Вызываем StartNewGame вместо ChangeState
+                // Запускаем новую игру
                 _form.StartNewGame();
             }
             else if (_exitButton.Contains(e.Location))
             {
                 _form.Close();
+            }
+        }
+
+        public void HandleInput(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                _form.StartNewGame();
             }
         }
 

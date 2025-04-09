@@ -22,11 +22,21 @@ namespace PlatformerGame.Forms
             this.ClientSize = new Size(800, 600);
             this.DoubleBuffered = true;
 
+            // Инициализация главного меню при запуске
             this.Load += (sender, e) =>
             {
-                StartNewGame();
+                ShowMainMenu();
                 this.Focus();
             };
+        }
+
+        public void ShowMainMenu()
+        {
+            // Остановка игрового таймера, если он был запущен
+            _gameTimer?.Stop();
+
+            // Создаем новое состояние меню
+            ChangeState(new MainMenuState(this));
         }
 
         public void StartNewGame()
@@ -35,29 +45,19 @@ namespace PlatformerGame.Forms
             _level = new Level(ClientSize);
             _player = new Player(_level.StartPlatform);
 
-            // Остановка предыдущего таймера
-            if (_gameTimer != null)
-            {
-                _gameTimer.Stop();
-                _gameTimer.Update -= GameLoop; // Отписываемся от старого события
-            }
-
-            // Создание и запуск нового таймера
+            // Настройка таймера
             _gameTimer = new GameTimer(16);
             _gameTimer.Update += GameLoop;
             _gameTimer.Start();
 
-            // Установка игрового состояния
+            // Переход в игровое состояние
             ChangeState(new PlayingState(this, _player, _level));
         }
 
         private void GameLoop()
         {
-            _currentState?.Update(); // Теперь вызываем Update состояния
-
             if (_currentState is PlayingState)
             {
-                // Основная игровая логика остается здесь
                 _player.Update(_level.Platforms);
                 _level.Update(_player.Position.X);
 
@@ -65,11 +65,8 @@ namespace PlatformerGame.Forms
                 {
                     GameOver();
                 }
-                else
-                {
-                    this.Invalidate();
-                }
             }
+            this.Invalidate();
         }
 
 
