@@ -60,6 +60,12 @@ namespace PlatformerGame.GameStates
             }
         }
 
+        public void OnResize(EventArgs e)
+        {
+            // Для игрового состояния можно добавить логику при необходимости
+            // Например, пересчет позиций UI элементов
+        }
+
         public void HandleMouseClick(MouseEventArgs e)
         {
             // Можно добавить обработку кликов во время игры

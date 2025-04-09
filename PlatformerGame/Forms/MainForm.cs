@@ -132,10 +132,17 @@ namespace PlatformerGame.Forms
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            if (_isFullScreen && this.WindowState != FormWindowState.Maximized)
-                this.WindowState = FormWindowState.Maximized;
 
-            this.Invalidate();
+            if (_isFullScreen && WindowState != FormWindowState.Maximized)
+                WindowState = FormWindowState.Maximized;
+
+            // Сообщаем текущему состоянию об изменении размера
+            if (_currentState is MainMenuState menuState)
+            {
+                menuState.OnResize(e);
+            }
+
+            Invalidate();
         }
 
         private void ToggleFullScreen()

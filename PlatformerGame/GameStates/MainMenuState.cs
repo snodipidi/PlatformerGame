@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 using PlatformerGame.Forms;
 
@@ -56,7 +57,6 @@ namespace PlatformerGame.GameStates
         {
             if (_startButton.Contains(e.Location))
             {
-                // Запускаем новую игру
                 _form.StartNewGame();
             }
             else if (_exitButton.Contains(e.Location))
@@ -73,7 +73,36 @@ namespace PlatformerGame.GameStates
             }
         }
 
-        public void OnEnter() { }
+        public void OnEnter()
+        {
+            UpdateButtonPositions();
+        }
+
+
+        public void OnResize(EventArgs e)
+        {
+            UpdateButtonPositions();
+        }
+
+        private void UpdateButtonPositions()
+        {
+            int centerX = _form.ClientSize.Width / 2;
+
+            _startButton = new Rectangle(
+                centerX - 100,
+                250,
+                200,
+                50
+            );
+
+            _exitButton = new Rectangle(
+                centerX - 100,
+                320,
+                200,
+                50
+            );
+
+        }
         public void OnExit() { }
     }
 }
