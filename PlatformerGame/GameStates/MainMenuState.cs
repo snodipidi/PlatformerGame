@@ -26,7 +26,16 @@ namespace PlatformerGame.GameStates
                 LineAlignment = StringAlignment.Center
             };
 
+            // Подписываемся на событие изменения размера формы
+            _form.Resize += Form_Resize;
+
             UpdateButtonPositions();
+        }
+
+        private void Form_Resize(object sender, EventArgs e)
+        {
+            UpdateButtonPositions();
+            _form.Invalidate();
         }
 
         private void UpdateButtonPositions()
@@ -43,6 +52,7 @@ namespace PlatformerGame.GameStates
         public void OnResize(EventArgs e)
         {
             UpdateButtonPositions();
+            _form.Invalidate();
         }
 
         public void Draw(Graphics g)
@@ -108,6 +118,9 @@ namespace PlatformerGame.GameStates
 
         public void OnExit()
         {
+            // Отписываемся от события при выходе из состояния
+            _form.Resize -= Form_Resize;
+
             _titleFont.Dispose();
             _buttonFont.Dispose();
             _textFormat.Dispose();
