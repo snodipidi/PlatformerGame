@@ -6,9 +6,9 @@
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                _backgroundImage?.Dispose(); 
             }
             base.Dispose(disposing);
         }

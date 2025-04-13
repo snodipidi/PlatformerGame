@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameStates\GameOverState.cs" />
+    <Compile Include="GameStates\LevelsState.cs" />
     <Compile Include="GameStates\PlayingState.cs" />
     <Compile Include="GameStates\MainMenuState.cs" />
     <Compile Include="Forms\MainForm.cs">
@@ -87,13 +88,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="player.png" />
+    <EmbeddedResource Include="Resourses\player.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="back1.png" />
+    <EmbeddedResource Include="Resourses\back1.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Resourses\" />
+    <Content Include="Resourses\block.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

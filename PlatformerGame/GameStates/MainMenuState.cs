@@ -1,7 +1,7 @@
-﻿using System;
+﻿using PlatformerGame.Forms;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
-using PlatformerGame.Forms;
 
 namespace PlatformerGame.GameStates
 {
@@ -9,48 +9,62 @@ namespace PlatformerGame.GameStates
     {
         private readonly MainForm _form;
         private Rectangle _startButton;
+        private Rectangle _levelsButton;
         private Rectangle _exitButton;
-        private readonly Font _titleFont = new Font("Arial", 48, FontStyle.Bold);
-        private readonly Font _buttonFont = new Font("Arial", 16, FontStyle.Bold);
+        private readonly Font _titleFont;
+        private readonly Font _buttonFont;
+        private readonly StringFormat _textFormat;
 
         public MainMenuState(MainForm form)
         {
             _form = form;
-            InitializeUI();
-        }
-
-        private void InitializeUI()
-        {
-            _startButton = new Rectangle(_form.ClientSize.Width / 2 - 100, 250, 200, 50);
-            _exitButton = new Rectangle(_form.ClientSize.Width / 2 - 100, 320, 200, 50);
-        }
-
-        public void Update() { }
-
-        public void Draw(Graphics g)
-        {
-            g.FillRectangle(new SolidBrush(Color.FromArgb(220, 0, 0, 0)),
-                new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height));
-
-            string title = "Platformer Game";
-            var titleSize = g.MeasureString(title, _titleFont);
-            g.DrawString(title, _titleFont, Brushes.White,
-                (_form.ClientSize.Width - titleSize.Width) / 2, 100);
-
-            g.FillRectangle(Brushes.LightGreen, _startButton);
-            g.DrawRectangle(Pens.DarkGreen, _startButton);
-
-            g.FillRectangle(Brushes.LightCoral, _exitButton);
-            g.DrawRectangle(Pens.DarkRed, _exitButton);
-
-            var format = new StringFormat
+            _titleFont = new Font("Arial", 48, FontStyle.Bold);
+            _buttonFont = new Font("Arial", 16, FontStyle.Bold);
+            _textFormat = new StringFormat
             {
                 Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Center
             };
 
-            g.DrawString("Играть", _buttonFont, Brushes.Black, _startButton, format);
-            g.DrawString("Выход", _buttonFont, Brushes.Black, _exitButton, format);
+            UpdateButtonPositions();
+        }
+
+        private void UpdateButtonPositions()
+        {
+            int centerX = _form.ClientSize.Width / 2;
+            int centerY = _form.ClientSize.Height / 2;
+
+            // Позиционируем кнопки относительно центра экрана
+            _startButton = new Rectangle(centerX - 100, centerY - 60, 200, 50);
+            _levelsButton = new Rectangle(centerX - 100, centerY + 10, 200, 50);
+            _exitButton = new Rectangle(centerX - 100, centerY + 80, 200, 50);
+        }
+
+        public void OnResize(EventArgs e)
+        {
+            UpdateButtonPositions();
+        }
+
+        public void Draw(Graphics g)
+        {
+            // Заголовок игры
+            string title = "Platformer Game";
+            var titleSize = g.MeasureString(title, _titleFont);
+            g.DrawString(title, _titleFont, Brushes.White,
+                (_form.ClientSize.Width - titleSize.Width) / 2,
+                100);
+
+            // Кнопки
+            DrawButton(g, _startButton, "Начать игру", Brushes.LightGreen, Pens.DarkGreen);
+            DrawButton(g, _levelsButton, "Уровни", Brushes.LightBlue, Pens.DarkBlue);
+            DrawButton(g, _exitButton, "Выход", Brushes.LightCoral, Pens.DarkRed);
+        }
+
+        private void DrawButton(Graphics g, Rectangle rect, string text, Brush fill, Pen border)
+        {
+            g.FillRectangle(fill, rect);
+            g.DrawRectangle(border, rect);
+            g.DrawString(text, _buttonFont, Brushes.Black, rect, _textFormat);
         }
 
         public void HandleMouseClick(MouseEventArgs e)
@@ -58,6 +72,10 @@ namespace PlatformerGame.GameStates
             if (_startButton.Contains(e.Location))
             {
                 _form.StartNewGame();
+            }
+            else if (_levelsButton.Contains(e.Location))
+            {
+                _form.ShowLevelsMenu();
             }
             else if (_exitButton.Contains(e.Location))
             {
@@ -71,38 +89,28 @@ namespace PlatformerGame.GameStates
             {
                 _form.StartNewGame();
             }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                _form.Close();
+            }
+            else if (e.KeyCode == Keys.L)
+            {
+                _form.ShowLevelsMenu();
+            }
         }
+
+        public void Update() { }
 
         public void OnEnter()
         {
             UpdateButtonPositions();
         }
 
-
-        public void OnResize(EventArgs e)
+        public void OnExit()
         {
-            UpdateButtonPositions();
+            _titleFont.Dispose();
+            _buttonFont.Dispose();
+            _textFormat.Dispose();
         }
-
-        private void UpdateButtonPositions()
-        {
-            int centerX = _form.ClientSize.Width / 2;
-
-            _startButton = new Rectangle(
-                centerX - 100,
-                250,
-                200,
-                50
-            );
-
-            _exitButton = new Rectangle(
-                centerX - 100,
-                320,
-                200,
-                50
-            );
-
-        }
-        public void OnExit() { }
     }
 }

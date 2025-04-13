@@ -15,14 +15,25 @@ namespace PlatformerGame.Forms
         private bool _isFullScreen = false;
         private FormWindowState _previousWindowState;
         private Rectangle _previousBounds;
+        private Bitmap _backgroundImage;
 
         public MainForm()
         {
             InitializeComponent();
             this.ClientSize = new Size(800, 600);
+
+            try
+            {
+                _backgroundImage = new Bitmap(@"C:\Users\msmil\source\repos\PlatformerGame\PlatformerGame\Resourses\back1.png");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось загрузить фон: {ex.Message}");
+                _backgroundImage = null;
+            }
+
             this.DoubleBuffered = true;
 
-            // Инициализация главного меню при запуске
             this.Load += (sender, e) =>
             {
                 ShowMainMenu();
@@ -86,22 +97,18 @@ namespace PlatformerGame.Forms
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (_currentState == null)
+            if (_backgroundImage != null)
             {
-                e.Graphics.Clear(Color.Black);
-                e.Graphics.DrawString("Loading...", Font, Brushes.White, 10, 10);
-                return;
+                e.Graphics.DrawImage(_backgroundImage, 0, 0, this.ClientSize.Width, this.ClientSize.Height);
             }
-
-            try
+            else
             {
                 e.Graphics.Clear(Color.SkyBlue);
-                _currentState.Draw(e.Graphics);
             }
-            catch
+
+            if (_currentState != null)
             {
-                e.Graphics.Clear(Color.Black);
-                e.Graphics.DrawString("Game Content", Font, Brushes.White, 10, 10);
+                _currentState.Draw(e.Graphics);
             }
 
             base.OnPaint(e);
@@ -132,17 +139,7 @@ namespace PlatformerGame.Forms
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-
-            if (_isFullScreen && WindowState != FormWindowState.Maximized)
-                WindowState = FormWindowState.Maximized;
-
-            // Сообщаем текущему состоянию об изменении размера
-            if (_currentState is MainMenuState menuState)
-            {
-                menuState.OnResize(e);
-            }
-
-            Invalidate();
+            this.Invalidate();
         }
 
         private void ToggleFullScreen()
@@ -163,5 +160,12 @@ namespace PlatformerGame.Forms
             }
             this.Invalidate();
         }
+
+        public void ShowLevelsMenu()
+        {
+            ChangeState(new LevelsState(this));
+        }
+
+        
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace PlatformerGame.GameObjects
 {
@@ -13,9 +14,18 @@ namespace PlatformerGame.GameObjects
         private readonly Random random = new Random();
         private int lastPlatformX;
         private readonly Size screenSize;
+        private readonly Bitmap _blockTexture;
 
         public Level(Size screenSize)
         {
+            try
+            {
+                _blockTexture = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\block.png"); 
+            }
+            catch
+            {
+                _blockTexture = null;
+            }
             this.screenSize = screenSize;
             StartPlatform = new Rectangle(0, screenSize.Height - 100, 300, 20);
             Platforms.Add(StartPlatform);
@@ -47,13 +57,35 @@ namespace PlatformerGame.GameObjects
 
         public void Draw(Graphics g)
         {
-            foreach (var platform in Platforms)
+            if (_blockTexture != null)
             {
-                try
+                foreach (var platform in Platforms)
+                {
+                    DrawTexturedPlatform(g, platform);
+                }
+            }
+            else
+            {
+                foreach (var platform in Platforms)
                 {
                     g.FillRectangle(Brushes.Green, platform);
                 }
-                catch { /* игнорируем ошибки отрисовки */ }
+            }
+        }
+
+        private void DrawTexturedPlatform(Graphics g, Rectangle platform)
+        {
+            if (platform.Width > _blockTexture.Width)
+            {
+                using (var brush = new TextureBrush(_blockTexture, WrapMode.Tile))
+                {
+                    brush.TranslateTransform(platform.X, platform.Y);
+                    g.FillRectangle(brush, platform);
+                }
+            }
+            else
+            {
+                g.DrawImage(_blockTexture, platform);
             }
         }
     }
