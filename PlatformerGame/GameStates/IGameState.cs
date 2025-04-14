@@ -10,5 +10,5 @@ public interface IGameState
     void HandleMouseClick(MouseEventArgs e);
     void OnEnter();
     void OnExit();
-    void OnResize(EventArgs e); 
+    void OnResize(EventArgs e);
 }

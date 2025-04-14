@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameStates\LevelCompleteState.cs" />
     <Compile Include="GameStates\GameOverState.cs" />
     <Compile Include="GameStates\LevelsState.cs" />
     <Compile Include="GameStates\PlayingState.cs" />
@@ -95,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resourses\block.png" />
+    <Content Include="Resourses\finish_flag.png" />
     <Content Include="Resourses\player_an.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

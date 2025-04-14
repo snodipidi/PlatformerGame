@@ -20,7 +20,7 @@ namespace PlatformerGame.GameObjects
         {
             try
             {
-                _blockTexture = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\block.png"); 
+                _blockTexture = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\block.png");
             }
             catch
             {

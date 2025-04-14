@@ -55,7 +55,7 @@ namespace PlatformerGame.GameStates
                     _player.Jump();
                     break;
                 case Keys.Escape:
-                    _form.ShowMainMenu(); 
+                    _form.ShowMainMenu();
                     break;
             }
         }

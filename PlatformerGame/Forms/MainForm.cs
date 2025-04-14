@@ -166,6 +166,6 @@ namespace PlatformerGame.Forms
             ChangeState(new LevelsState(this));
         }
 
-        
+
     }
 }
