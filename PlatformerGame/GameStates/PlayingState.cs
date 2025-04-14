@@ -12,6 +12,7 @@ namespace PlatformerGame.GameStates
         private readonly MainForm _form;
         private readonly Player _player;
         private readonly Level _level;
+        private readonly Font _progressFont = new Font("Arial", 12, FontStyle.Bold);
 
         public PlayingState(MainForm form, Player player, Level level)
         {
@@ -34,10 +35,59 @@ namespace PlatformerGame.GameStates
                 _level.Draw(g);
                 _player.Draw(g);
                 g.ResetTransform();
+
+                // Рисуем индикатор прогресса
+                DrawProgressBar(g);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Ошибка отрисовки: {ex.Message}");
+            }
+        }
+
+        private void DrawProgressBar(Graphics g)
+        {
+            // Полоса прогресса
+            int barWidth = 200;
+            int barHeight = 20;
+            int margin = 20;
+
+            Rectangle barRect = new Rectangle(
+                _form.ClientSize.Width - barWidth - margin,
+                margin,
+                barWidth,
+                barHeight);
+
+            // Фон полосы
+            g.FillRectangle(Brushes.LightGray, barRect);
+            g.DrawRectangle(Pens.Black, barRect);
+
+            // Заполненная часть
+            float progress = _level.Progress;
+            Rectangle filledRect = new Rectangle(
+                barRect.X,
+                barRect.Y,
+                (int)(barRect.Width * progress),
+                barRect.Height);
+
+            g.FillRectangle(Brushes.Green, filledRect);
+
+            // Текст с процентами
+            string text = $"{progress * 100:0}%";
+            var textSize = g.MeasureString(text, _progressFont);
+            g.DrawString(text, _progressFont, Brushes.Black,
+                barRect.X + barRect.Width / 2 - textSize.Width / 2,
+                barRect.Y + barRect.Height / 2 - textSize.Height / 2);
+
+            // Миниатюра флажка в конце полосы
+            if (_level.FinishFlag != null && _level.FinishFlag.Width > 0)
+            {
+                int flagSize = 15;
+                g.DrawImage(_level.FinishFlagTexture,
+                    barRect.Right - flagSize / 2,
+                    barRect.Y - flagSize - 5,
+                    flagSize,
+                    flagSize * 2);
             }
         }
 

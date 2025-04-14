@@ -17,6 +17,7 @@ namespace PlatformerGame.GameObjects
         private int _animationCounter = 0;
         private const int AnimationDelay = 10; // Скорость переключения
 
+
         // Физика (без изменений)
         public PointF Position { get; private set; }
         public bool IsMovingLeft { get; private set; }
@@ -25,6 +26,7 @@ namespace PlatformerGame.GameObjects
         private float _verticalVelocity = 0;
         private const float Gravity = 0.5f;
         private const float JumpForce = 12f;
+        public float GetProgressX() => Position.X;
 
         public Player(Rectangle startPlatform)
         {
@@ -125,6 +127,11 @@ namespace PlatformerGame.GameObjects
         {
             _standingSprite?.Dispose();
             _walkingSprite?.Dispose();
+        }
+
+        public RectangleF GetBounds()
+        {
+            return new RectangleF(Position.X, Position.Y, Width, Height);
         }
     }
 }

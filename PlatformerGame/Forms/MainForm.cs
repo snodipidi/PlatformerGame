@@ -71,13 +71,30 @@ namespace PlatformerGame.Forms
             {
                 _player.Update(_level.Platforms);
                 _level.Update(_player.Position.X);
+                _level.CheckCompletion(_player);
+
+                // Убедимся, что флажок всегда в зоне видимости
+                if (_level.FinishFlag.Right < _level.CameraOffset + this.ClientSize.Width)
+                {
+                    _level.CameraOffset = _level.FinishFlag.Right - this.ClientSize.Width;
+                }
 
                 if (_player.HasFallen(ClientSize.Height))
                 {
                     GameOver();
                 }
+                else if (_level.IsLevelCompleted)
+                {
+                    LevelCompleted();
+                }
             }
             this.Invalidate();
+        }
+
+        public void LevelCompleted()
+        {
+            ChangeState(new LevelCompletedState(this));
+            _gameTimer?.Stop();
         }
 
 
