@@ -10,11 +10,12 @@ namespace PlatformerGame.GameObjects
     {
         public Rectangle StartPlatform { get; }
         public List<Rectangle> Platforms { get; } = new List<Rectangle>();
-        public int CameraOffset { get; set; } // Изменено на публичный set
+        public int CameraOffset { get; set; }
         public Rectangle FinishFlag { get; private set; }
         public bool IsLevelCompleted { get; private set; }
         public int TotalLength { get; private set; }
-        public Bitmap FinishFlagTexture => _finishFlagTexture; 
+        public Bitmap FinishFlagTexture => _finishFlagTexture;
+        public float StartPosition => StartPlatform.X + 50;
 
         private readonly Random random = new Random();
         private int lastPlatformX;
@@ -22,7 +23,7 @@ namespace PlatformerGame.GameObjects
         private readonly Bitmap _blockTexture;
         private readonly Bitmap _finishFlagTexture;
         private const int FinishAreaWidth = 300;
-        public float StartPosition => StartPlatform.X + 50;
+
         public float Progress
         {
             get
@@ -36,44 +37,49 @@ namespace PlatformerGame.GameObjects
             }
         }
 
-        public Level(Size screenSize)
+        public Level(Size screenSize, LevelData data = null)
         {
             try
             {
                 _blockTexture = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\block.png");
                 _finishFlagTexture = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\finish_flag.png");
             }
-            catch (Exception ex)
+            catch
             {
-                Debug.WriteLine($"Ошибка загрузки текстур: {ex.Message}");
                 _blockTexture = null;
                 _finishFlagTexture = null;
             }
 
             this.screenSize = screenSize;
 
-            // Начальная платформа
+            int length = data?.Length ?? 3000;
+            int platformCount = data?.PlatformCount ?? 20;
+            int difficultyLevel = data?.Difficulty ?? 1;
+
             StartPlatform = new Rectangle(0, screenSize.Height - 100, 300, 20);
             Platforms.Add(StartPlatform);
             lastPlatformX = StartPlatform.Right;
 
-            // Определяем длину уровня (примерно 3 экрана)
-            TotalLength = screenSize.Width * 3;
+            TotalLength = length;
 
-            // Генерируем платформы до конца уровня
-            while (lastPlatformX < TotalLength - FinishAreaWidth)
-            {
-                GeneratePlatform();
-            }
+            for (int i = 0; i < platformCount; i++)
+                GeneratePlatform(difficultyLevel);
 
-            // Зона финиша с несколькими платформами
-            GenerateFinalPlatforms();
-
-            // Создаем финишный флажок
+            GenerateFinalPlatforms(difficultyLevel);
             CreateFinishFlag();
         }
 
-        private void GenerateFinalPlatforms()
+        private void GeneratePlatform(int difficulty)
+        {
+            int width = random.Next(80, 150 - difficulty * 10);
+            int x = lastPlatformX + random.Next(100, 250 - difficulty * 20);
+            int y = random.Next(screenSize.Height / 2, screenSize.Height - 50);
+
+            Platforms.Add(new Rectangle(x, y, width, 20));
+            lastPlatformX = x + width;
+        }
+
+        private void GenerateFinalPlatforms(int difficulty)
         {
             // Большая финальная платформа
             int finalPlatformWidth = 200;
@@ -96,27 +102,15 @@ namespace PlatformerGame.GameObjects
         {
             var lastPlatform = Platforms[Platforms.Count - 1];
             FinishFlag = new Rectangle(
-                lastPlatform.X + lastPlatform.Width / 2 - 15,
+                lastPlatform.Right - 25,
                 lastPlatform.Y - 60,
                 30,
                 60);
         }
 
-        private void GeneratePlatform()
-        {
-            int width = random.Next(80, 150);
-            int x = lastPlatformX + random.Next(100, 250);
-            int y = random.Next(screenSize.Height / 2, screenSize.Height - 50);
-            Platforms.Add(new Rectangle(x, y, width, 20));
-            lastPlatformX = x + width;
-        }
-
         public void Update(float playerX)
         {
-            // Камера следует за игроком с отступом в 1/3 экрана
             CameraOffset = (int)(playerX - screenSize.Width / 3);
-
-            // Ограничиваем камеру границами уровня
             int maxOffset = TotalLength - screenSize.Width;
             CameraOffset = Math.Min(maxOffset, Math.Max(0, CameraOffset));
         }
@@ -146,6 +140,7 @@ namespace PlatformerGame.GameObjects
                     g.FillRectangle(Brushes.Green, platform);
                 }
             }
+
             if (_finishFlagTexture != null)
             {
                 g.DrawImage(_finishFlagTexture, FinishFlag);

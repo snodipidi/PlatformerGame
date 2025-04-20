@@ -2,21 +2,25 @@
 using System.Drawing;
 using System.Windows.Forms;
 using PlatformerGame.Forms;
+using PlatformerGame.GameObjects;
 
 namespace PlatformerGame.GameStates
 {
     public class LevelCompletedState : IGameState
     {
         private readonly MainForm _form;
-        private Rectangle _nextLevelButton;
+        private readonly LevelManager _levelManager;
+        private Rectangle _retryButton;
+        private Rectangle _nextButton;
         private Rectangle _menuButton;
         private readonly Font _titleFont = new Font("Arial", 32, FontStyle.Bold);
         private readonly Font _buttonFont = new Font("Arial", 12, FontStyle.Bold);
         private readonly Font _infoFont = new Font("Arial", 14, FontStyle.Italic);
 
-        public LevelCompletedState(MainForm form)
+        public LevelCompletedState(MainForm form, LevelManager levelManager)
         {
             _form = form;
+            _levelManager = levelManager;
             UpdateButtonPositions();
         }
 
@@ -25,19 +29,9 @@ namespace PlatformerGame.GameStates
             int centerX = _form.ClientSize.Width / 2;
             int centerY = _form.ClientSize.Height / 2;
 
-            _nextLevelButton = new Rectangle(
-                centerX - 100,
-                centerY + 10,
-                200,
-                50
-            );
-
-            _menuButton = new Rectangle(
-                centerX - 100,
-                centerY + 80, // Увеличил отступ между кнопками
-                200,
-                50
-            );
+            _retryButton = new Rectangle(centerX - 100, centerY + 10, 200, 50);
+            _nextButton = new Rectangle(centerX - 100, centerY + 70, 200, 50);
+            _menuButton = new Rectangle(centerX - 100, centerY + 130, 200, 50);
         }
 
         public void OnResize(EventArgs e)
@@ -48,28 +42,27 @@ namespace PlatformerGame.GameStates
 
         public void Draw(Graphics g)
         {
-            // Полупрозрачный темно-синий фон
+            // Полупрозрачный фон
             g.FillRectangle(new SolidBrush(Color.FromArgb(220, 0, 0, 80)),
                 new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height));
 
             // Заголовок
-            string title = "Уровень пройден!";
+            string title = $"Уровень {_levelManager.GetCurrentLevel().LevelNumber} пройден!";
             var titleSize = g.MeasureString(title, _titleFont);
             g.DrawString(title, _titleFont, Brushes.Gold,
                 (_form.ClientSize.Width - titleSize.Width) / 2,
-                _form.ClientSize.Height / 2 - 100);
+                _form.ClientSize.Height / 2 - 60);
 
-            // Сообщение о следующем уровне
-            string info = "Следующий уровень в разработке...";
-            var infoSize = g.MeasureString(info, _infoFont);
-            g.DrawString(info, _infoFont, Brushes.White,
-                (_form.ClientSize.Width - infoSize.Width) / 2,
-                _form.ClientSize.Height / 2 - 30);
+            // Кнопки
+            DrawButton(g, _retryButton, "Повторить (R)", Brushes.LightGreen, Pens.DarkGreen);
 
-            // Кнопка "Попробовать снова"
-            DrawButton(g, _nextLevelButton, "Попробовать снова (R)", Brushes.LightGreen, Pens.DarkGreen);
+            // Показываем кнопку следующего уровня только если он есть
+            if (_levelManager.GetCurrentLevel().LevelNumber < _levelManager.GetAllLevels().Count)
+            {
+                DrawButton(g, _nextButton, $"Уровень {_levelManager.GetCurrentLevel().LevelNumber + 1} (N)",
+                    Brushes.LightBlue, Pens.DarkBlue);
+            }
 
-            // Кнопка "В меню"
             DrawButton(g, _menuButton, "В меню (M)", Brushes.LightCoral, Pens.DarkRed);
         }
 
@@ -89,9 +82,15 @@ namespace PlatformerGame.GameStates
 
         public void HandleInput(KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.R)
+            if (e.KeyCode == Keys.R) // Повторить
             {
-                _form.StartNewGame(); // Перезапуск текущего уровня
+                _form.StartNewGame();
+            }
+            else if (e.KeyCode == Keys.N) // Следующий уровень
+            {
+                int currentLevelNum = _levelManager.GetCurrentLevel().LevelNumber;
+                _levelManager.SetCurrentLevel(currentLevelNum + 1); // Увеличиваем номер уровня
+                _form.StartNewGame();
             }
             else if (e.KeyCode == Keys.M || e.KeyCode == Keys.Escape)
             {
@@ -101,8 +100,14 @@ namespace PlatformerGame.GameStates
 
         public void HandleMouseClick(MouseEventArgs e)
         {
-            if (_nextLevelButton.Contains(e.Location))
+            if (_retryButton.Contains(e.Location))
             {
+                _form.StartNewGame();
+            }
+            else if (_nextButton.Contains(e.Location))
+            {
+                int currentLevelNum = _levelManager.GetCurrentLevel().LevelNumber;
+                _levelManager.SetCurrentLevel(currentLevelNum + 1);
                 _form.StartNewGame();
             }
             else if (_menuButton.Contains(e.Location))

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using PlatformerGame.GameObjects;
@@ -16,6 +17,7 @@ namespace PlatformerGame.Forms
         private FormWindowState _previousWindowState;
         private Rectangle _previousBounds;
         private Bitmap _backgroundImage;
+        private readonly LevelManager _levelManager = new LevelManager();
 
         public MainForm()
         {
@@ -41,28 +43,29 @@ namespace PlatformerGame.Forms
             };
         }
 
+        private void StartLevel(LevelData levelData)
+        {
+            _level = new Level(ClientSize, levelData);
+            _player = new Player(_level.StartPlatform);
+
+            _gameTimer = new GameTimer(16);
+            _gameTimer.Update += GameLoop;
+            _gameTimer.Start();
+
+            ChangeState(new PlayingState(this, _player, _level, _levelManager));
+        }
+
         public void ShowMainMenu()
         {
-            // Остановка игрового таймера, если он был запущен
             _gameTimer?.Stop();
-
-            // Создаем новое состояние меню
             ChangeState(new MainMenuState(this));
         }
 
         public void StartNewGame()
         {
-            // Инициализация игровых объектов
-            _level = new Level(ClientSize);
-            _player = new Player(_level.StartPlatform);
-
-            // Настройка таймера
-            _gameTimer = new GameTimer(16);
-            _gameTimer.Update += GameLoop;
-            _gameTimer.Start();
-
-            // Переход в игровое состояние
-            ChangeState(new PlayingState(this, _player, _level));
+            var currentLevel = _levelManager.GetCurrentLevel();
+            Debug.WriteLine($"Запуск уровня {currentLevel.LevelNumber}"); // Для отладки
+            StartLevel(currentLevel);
         }
 
         private void GameLoop()
@@ -72,12 +75,10 @@ namespace PlatformerGame.Forms
                 _player.Update(_level.Platforms);
                 _level.Update(_player.Position.X);
 
-                // Проверяем достижение флажка
                 if (_player.GetBounds().IntersectsWith(_level.FinishFlag))
                 {
-                    // Принудительно выставляем 100% при достижении флажка
                     _level.CameraOffset = _level.TotalLength - this.ClientSize.Width;
-                    LevelCompleted();
+                    CompleteLevel();
                 }
                 else if (_player.HasFallen(ClientSize.Height))
                 {
@@ -88,12 +89,28 @@ namespace PlatformerGame.Forms
             }
         }
 
-        public void LevelCompleted()
+        public void CompleteLevel()
         {
-            ChangeState(new LevelCompletedState(this));
+            _levelManager.UnlockNextLevel();
+            ChangeState(new LevelCompletedState(this, _levelManager));
             _gameTimer?.Stop();
         }
 
+        public void GameOver()
+        {
+            ChangeState(new GameOverState(this));
+            _gameTimer?.Stop();
+        }
+
+        public void ShowLevelsMenu()
+        {
+            ChangeState(new LevelsState(this, _levelManager));
+        }
+
+        public void ShowRules()
+        {
+            ChangeState(new RulesState(this));
+        }
 
         public void ChangeState(IGameState newState)
         {
@@ -101,12 +118,6 @@ namespace PlatformerGame.Forms
             _currentState = newState;
             _currentState?.OnEnter();
             this.Invalidate();
-        }
-
-        public void GameOver()
-        {
-            ChangeState(new GameOverState(this));
-            _gameTimer?.Stop();
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -173,16 +184,6 @@ namespace PlatformerGame.Forms
                 this.Bounds = _previousBounds;
             }
             this.Invalidate();
-        }
-
-        public void ShowLevelsMenu()
-        {
-            ChangeState(new LevelsState(this));
-        }
-
-        public void ShowRules()
-        {
-            ChangeState(new RulesState(this));
         }
     }
 }
