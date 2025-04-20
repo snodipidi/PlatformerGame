@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameStates\RulesState.cs" />
     <Compile Include="GameStates\LevelCompleteState.cs" />
     <Compile Include="GameStates\GameOverState.cs" />
     <Compile Include="GameStates\LevelsState.cs" />

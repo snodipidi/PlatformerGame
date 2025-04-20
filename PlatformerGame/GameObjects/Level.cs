@@ -14,8 +14,7 @@ namespace PlatformerGame.GameObjects
         public Rectangle FinishFlag { get; private set; }
         public bool IsLevelCompleted { get; private set; }
         public int TotalLength { get; private set; }
-        public float Progress => Math.Min(1, (float)CameraOffset / TotalLength);
-        public Bitmap FinishFlagTexture => _finishFlagTexture; // Добавлено публичное свойство
+        public Bitmap FinishFlagTexture => _finishFlagTexture; 
 
         private readonly Random random = new Random();
         private int lastPlatformX;
@@ -23,7 +22,19 @@ namespace PlatformerGame.GameObjects
         private readonly Bitmap _blockTexture;
         private readonly Bitmap _finishFlagTexture;
         private const int FinishAreaWidth = 300;
+        public float StartPosition => StartPlatform.X + 50;
+        public float Progress
+        {
+            get
+            {
+                if (TotalLength <= StartPosition) return 1f;
+                float totalDistance = FinishFlag.X - StartPosition;
+                float traveledDistance = CameraOffset + (screenSize.Width / 3) - StartPosition;
 
+                float progress = traveledDistance / totalDistance;
+                return Math.Min(1f, Math.Max(0f, progress));
+            }
+        }
 
         public Level(Size screenSize)
         {
@@ -102,14 +113,12 @@ namespace PlatformerGame.GameObjects
 
         public void Update(float playerX)
         {
-            CameraOffset = (int)playerX - screenSize.Width / 3; // Смещаем камеру раньше
-            if (CameraOffset < 0) CameraOffset = 0;
+            // Камера следует за игроком с отступом в 1/3 экрана
+            CameraOffset = (int)(playerX - screenSize.Width / 3);
 
-            // Убедимся, что флажок виден когда игрок близко
-            if (playerX > TotalLength - screenSize.Width)
-            {
-                CameraOffset = TotalLength - screenSize.Width;
-            }
+            // Ограничиваем камеру границами уровня
+            int maxOffset = TotalLength - screenSize.Width;
+            CameraOffset = Math.Min(maxOffset, Math.Max(0, CameraOffset));
         }
 
         public void CheckCompletion(Player player)
@@ -123,7 +132,6 @@ namespace PlatformerGame.GameObjects
 
         public void Draw(Graphics g)
         {
-            // Рисуем платформы
             if (_blockTexture != null)
             {
                 foreach (var platform in Platforms)
@@ -138,25 +146,14 @@ namespace PlatformerGame.GameObjects
                     g.FillRectangle(Brushes.Green, platform);
                 }
             }
-
-            // Рисуем финишный флажок
             if (_finishFlagTexture != null)
             {
                 g.DrawImage(_finishFlagTexture, FinishFlag);
             }
             else
             {
-                // Запасной вариант если текстура не загрузилась
                 g.FillRectangle(Brushes.Red, FinishFlag);
                 g.DrawRectangle(Pens.DarkRed, FinishFlag);
-            }
-
-            // Подсветка финишной зоны (для теста)
-            if (Debugger.IsAttached)
-            {
-                g.DrawRectangle(Pens.Red,
-                    TotalLength - FinishAreaWidth, 0,
-                    FinishAreaWidth, screenSize.Height);
             }
         }
 

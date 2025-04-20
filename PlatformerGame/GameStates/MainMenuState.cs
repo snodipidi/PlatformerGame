@@ -14,6 +14,7 @@ namespace PlatformerGame.GameStates
         private readonly Font _titleFont;
         private readonly Font _buttonFont;
         private readonly StringFormat _textFormat;
+         private Rectangle _rulesButton;
 
         public MainMenuState(MainForm form)
         {
@@ -25,9 +26,6 @@ namespace PlatformerGame.GameStates
                 Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Center
             };
-
-            // Подписываемся на событие изменения размера формы
-            _form.Resize += Form_Resize;
 
             UpdateButtonPositions();
         }
@@ -43,10 +41,10 @@ namespace PlatformerGame.GameStates
             int centerX = _form.ClientSize.Width / 2;
             int centerY = _form.ClientSize.Height / 2;
 
-            // Позиционируем кнопки относительно центра экрана
-            _startButton = new Rectangle(centerX - 100, centerY - 60, 200, 50);
-            _levelsButton = new Rectangle(centerX - 100, centerY + 10, 200, 50);
-            _exitButton = new Rectangle(centerX - 100, centerY + 80, 200, 50);
+            _startButton = new Rectangle(centerX - 100, centerY - 80, 200, 50);
+            _levelsButton = new Rectangle(centerX - 100, centerY - 20, 200, 50);
+            _rulesButton = new Rectangle(centerX - 100, centerY + 40, 200, 50); // Новая кнопка
+            _exitButton = new Rectangle(centerX - 100, centerY + 100, 200, 50);
         }
 
         public void OnResize(EventArgs e)
@@ -57,17 +55,18 @@ namespace PlatformerGame.GameStates
 
         public void Draw(Graphics g)
         {
-            // Заголовок игры
-            string title = "Platformer Game";
-            var titleSize = g.MeasureString(title, _titleFont);
-            g.DrawString(title, _titleFont, Brushes.White,
-                (_form.ClientSize.Width - titleSize.Width) / 2,
-                100);
+            {
+                string title = "Platformer Game";
+                var titleSize = g.MeasureString(title, _titleFont);
+                g.DrawString(title, _titleFont, Brushes.White,
+                    (_form.ClientSize.Width - titleSize.Width) / 2,
+                    100);
 
-            // Кнопки
-            DrawButton(g, _startButton, "Начать игру", Brushes.LightGreen, Pens.DarkGreen);
-            DrawButton(g, _levelsButton, "Уровни", Brushes.LightBlue, Pens.DarkBlue);
-            DrawButton(g, _exitButton, "Выход", Brushes.LightCoral, Pens.DarkRed);
+                DrawButton(g, _startButton, "Начать игру", Brushes.LightGreen, Pens.DarkGreen);
+                DrawButton(g, _levelsButton, "Уровни", Brushes.LightBlue, Pens.DarkBlue);
+                DrawButton(g, _rulesButton, "Правила", Brushes.LightGoldenrodYellow, Pens.DarkGoldenrod); 
+                DrawButton(g, _exitButton, "Выход", Brushes.LightCoral, Pens.DarkRed);
+            }
         }
 
         private void DrawButton(Graphics g, Rectangle rect, string text, Brush fill, Pen border)
@@ -86,6 +85,10 @@ namespace PlatformerGame.GameStates
             else if (_levelsButton.Contains(e.Location))
             {
                 _form.ShowLevelsMenu();
+            }
+            else if (_rulesButton.Contains(e.Location)) 
+            {
+                _form.ShowRules();
             }
             else if (_exitButton.Contains(e.Location))
             {
@@ -106,6 +109,10 @@ namespace PlatformerGame.GameStates
             else if (e.KeyCode == Keys.L)
             {
                 _form.ShowLevelsMenu();
+            }
+            else if (e.KeyCode == Keys.H) // H - help (правила)
+            {
+                _form.ShowRules();
             }
         }
 
