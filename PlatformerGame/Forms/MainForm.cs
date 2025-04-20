@@ -164,6 +164,7 @@ namespace PlatformerGame.Forms
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
+            _currentState?.OnResize(e); 
             this.Invalidate();
         }
 

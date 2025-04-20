@@ -26,7 +26,7 @@ namespace PlatformerGame.GameStates
         {
             _levelButtons.Clear();
             int centerX = _form.ClientSize.Width / 2;
-            int startY = 100;
+            int startY = _form.ClientSize.Height / 4; // Начинаем с 1/4 высоты окна
 
             foreach (var level in _levelManager.GetAllLevels())
             {
@@ -38,13 +38,18 @@ namespace PlatformerGame.GameStates
                 startY += 70;
             }
 
-            _backButton = new Rectangle(centerX - 100, _form.ClientSize.Height - 100, 200, 50);
+            // Кнопка "Назад" внизу по центру
+            _backButton = new Rectangle(
+                centerX - 100,
+                _form.ClientSize.Height - 100,
+                200,
+                50);
         }
 
         public void OnResize(EventArgs e)
         {
             UpdateButtonPositions();
-            _form.Invalidate();
+            _form.Invalidate(); 
         }
 
         public void Draw(Graphics g)

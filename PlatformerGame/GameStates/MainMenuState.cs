@@ -43,14 +43,14 @@ namespace PlatformerGame.GameStates
 
             _startButton = new Rectangle(centerX - 100, centerY - 80, 200, 50);
             _levelsButton = new Rectangle(centerX - 100, centerY - 20, 200, 50);
-            _rulesButton = new Rectangle(centerX - 100, centerY + 40, 200, 50); // Новая кнопка
+            _rulesButton = new Rectangle(centerX - 100, centerY + 40, 200, 50);
             _exitButton = new Rectangle(centerX - 100, centerY + 100, 200, 50);
         }
 
         public void OnResize(EventArgs e)
         {
             UpdateButtonPositions();
-            _form.Invalidate();
+            _form.Invalidate(); 
         }
 
         public void Draw(Graphics g)

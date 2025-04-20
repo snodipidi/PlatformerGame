@@ -29,15 +29,29 @@ namespace PlatformerGame.GameStates
             int centerX = _form.ClientSize.Width / 2;
             int centerY = _form.ClientSize.Height / 2;
 
-            _retryButton = new Rectangle(centerX - 100, centerY + 10, 200, 50);
-            _nextButton = new Rectangle(centerX - 100, centerY + 70, 200, 50);
-            _menuButton = new Rectangle(centerX - 100, centerY + 130, 200, 50);
+            _retryButton = new Rectangle(
+                centerX - 100,
+                centerY - 20, // Подняли кнопки выше
+                200,
+                50);
+
+            _nextButton = new Rectangle(
+                centerX - 100,
+                centerY + 50,
+                200,
+                50);
+
+            _menuButton = new Rectangle(
+                centerX - 100,
+                centerY + 120,
+                200,
+                50);
         }
 
         public void OnResize(EventArgs e)
         {
             UpdateButtonPositions();
-            _form.Invalidate();
+            _form.Invalidate(); 
         }
 
         public void Draw(Graphics g)
