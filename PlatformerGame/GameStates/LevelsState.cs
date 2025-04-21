@@ -55,14 +55,21 @@ namespace PlatformerGame.GameStates
         public void Draw(Graphics g)
         {
             g.Clear(Color.DarkSlateBlue);
-            var format = new StringFormat { Alignment = StringAlignment.Center };
 
             // Заголовок
             string header = "Выберите уровень";
-            var headerSize = g.MeasureString(header, _buttonFont);
-            g.DrawString(header, _buttonFont, Brushes.White,
+            var headerFont = new Font("Arial", 24, FontStyle.Bold);
+            var headerSize = g.MeasureString(header, headerFont);
+            g.DrawString(header, headerFont, Brushes.White,
                 (_form.ClientSize.Width - headerSize.Width) / 2,
-                50);
+                30);
+
+            // Настройки для текста кнопок
+            var format = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
 
             var levels = _levelManager.GetAllLevels();
             for (int i = 0; i < levels.Count; i++)
@@ -70,21 +77,26 @@ namespace PlatformerGame.GameStates
                 var level = levels[i];
                 var rect = _levelButtons[i];
 
+                // Рисуем кнопку
                 g.FillRectangle(level.IsLocked ? Brushes.Gray : Brushes.LightSteelBlue, rect);
                 g.DrawRectangle(Pens.DarkSlateBlue, rect);
 
+                // Текст кнопки (центрированный)
                 string text = level.IsLocked ?
                     $"Уровень {level.LevelNumber} (заблокирован)" :
                     $"Уровень {level.LevelNumber}";
 
                 g.DrawString(text, _buttonFont,
                     level.IsLocked ? Brushes.DarkGray : Brushes.Black,
-                    rect, format);
+                    rect, format); // Используем StringFormat для центрирования
             }
 
+            // Кнопка "Назад" (тоже с центрированным текстом)
             g.FillRectangle(Brushes.LightGray, _backButton);
             g.DrawRectangle(Pens.DarkGray, _backButton);
             g.DrawString("Назад", _buttonFont, Brushes.Black, _backButton, format);
+
+            headerFont.Dispose();
         }
 
         public void HandleMouseClick(MouseEventArgs e)
