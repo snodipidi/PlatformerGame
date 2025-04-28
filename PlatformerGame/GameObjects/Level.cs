@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
+using System.Linq;
 
 namespace PlatformerGame.GameObjects
 {
@@ -16,6 +17,7 @@ namespace PlatformerGame.GameObjects
         public int TotalLength { get; private set; }
         public Bitmap FinishFlagTexture => _finishFlagTexture;
         public float StartPosition => StartPlatform.X + 50;
+        public List<Rectangle> Traps { get; } = new List<Rectangle>();
 
         private readonly Random random = new Random();
         private int lastPlatformX;
@@ -51,21 +53,64 @@ namespace PlatformerGame.GameObjects
             }
 
             this.screenSize = screenSize;
+            TotalLength = data?.Length ?? 3000;
 
-            int length = data?.Length ?? 3000;
-            int platformCount = data?.PlatformCount ?? 20;
-            int difficultyLevel = data?.Difficulty ?? 1;
-
+            // Стартовая платформа
             StartPlatform = new Rectangle(0, screenSize.Height - 100, 300, 20);
             Platforms.Add(StartPlatform);
             lastPlatformX = StartPlatform.Right;
 
-            TotalLength = length;
+            if (data?.LevelNumber == 2) // Полностью фиксированный 2 уровень
+            {
+                // Основные параметры уровня
+                int groundY = screenSize.Height - 100;
+                int platformHeight = 20;
 
-            for (int i = 0; i < platformCount; i++)
-                GeneratePlatform(difficultyLevel);
+                // 1. Стартовая зона (безопасная)
+                Platforms.Add(new Rectangle(300, groundY - 50, 200, platformHeight));
+                Platforms.Add(new Rectangle(550, groundY - 100, 150, platformHeight));
 
-            GenerateFinalPlatforms(difficultyLevel);
+                // 2. Первая опасная зона (3 платформы с ловушками)
+                int trapSectionY = groundY - 150;
+                Platforms.Add(new Rectangle(800, trapSectionY, 200, platformHeight));
+                Traps.Add(new Rectangle(850, trapSectionY - 20, 100, 20)); // Ловушка сверху
+
+                Platforms.Add(new Rectangle(1100, trapSectionY + 50, 200, platformHeight));
+                Traps.Add(new Rectangle(1150, trapSectionY + 30, 100, 20));
+
+                Platforms.Add(new Rectangle(1400, trapSectionY, 200, platformHeight));
+                Traps.Add(new Rectangle(1450, trapSectionY - 20, 100, 20));
+
+                // 3. Безопасная зона для передышки
+                Platforms.Add(new Rectangle(1700, groundY - 80, 300, platformHeight));
+
+                // 4. Вторая опасная зона (движущиеся платформы с ловушками)
+                Platforms.Add(new Rectangle(2100, groundY - 200, 150, platformHeight));
+                Traps.Add(new Rectangle(2125, groundY - 220, 100, 20));
+
+                Platforms.Add(new Rectangle(2300, groundY - 150, 150, platformHeight));
+                Traps.Add(new Rectangle(2325, groundY - 170, 100, 20));
+
+                // 5. Финальный отрезок к флагу
+                Platforms.Add(new Rectangle(2600, groundY - 100, 200, platformHeight));
+                Platforms.Add(new Rectangle(2900, groundY - 150, 200, platformHeight));
+                Platforms.Add(new Rectangle(3200, groundY - 80, 200, platformHeight));
+
+                // Фиксируем общую длину уровня
+                TotalLength = 3500;
+                lastPlatformX = TotalLength;
+            }
+            else
+            {
+                // Обычная генерация для других уровней
+                int platformCount = data?.PlatformCount ?? 20;
+                int difficultyLevel = data?.Difficulty ?? 1;
+
+                for (int i = 0; i < platformCount; i++)
+                    GeneratePlatform(difficultyLevel);
+            }
+
+            GenerateFinalPlatforms(data?.Difficulty ?? 1);
             CreateFinishFlag();
         }
 
@@ -149,6 +194,22 @@ namespace PlatformerGame.GameObjects
             {
                 g.FillRectangle(Brushes.Red, FinishFlag);
                 g.DrawRectangle(Pens.DarkRed, FinishFlag);
+            }
+
+            foreach (var trap in Traps)
+            {
+                int spikeCount = 5;
+                int spikeWidth = trap.Width / spikeCount;
+
+                for (int i = 0; i < spikeCount; i++)
+                {
+                    Point[] spike = {
+                new Point(trap.X + i * spikeWidth, trap.Y + trap.Height), 
+                new Point(trap.X + (i + 1) * spikeWidth, trap.Y + trap.Height), 
+                new Point(trap.X + i * spikeWidth + spikeWidth/2, trap.Y) 
+            };
+                    g.FillPolygon(Brushes.Black, spike);
+                }
             }
         }
 

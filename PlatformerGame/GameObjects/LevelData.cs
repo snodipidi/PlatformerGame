@@ -1,4 +1,7 @@
-﻿namespace PlatformerGame.GameObjects
+﻿using System.Collections.Generic;
+using System.Drawing;
+
+namespace PlatformerGame.GameObjects
 {
     public class LevelData
     {
@@ -12,5 +15,6 @@
         public int Length { get; set; }
         public int PlatformCount { get; set; }
         public int Difficulty { get; set; }
+        public List<Rectangle> Traps { get; set; } = new List<Rectangle>();
     }
 }

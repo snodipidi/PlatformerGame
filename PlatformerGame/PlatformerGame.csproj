@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameObjects\Enemy.cs" />
     <Compile Include="GameObjects\LevelManager.cs" />
     <Compile Include="GameObjects\LevelData.cs" />
     <Compile Include="GameStates\RulesState.cs" />
@@ -92,15 +93,16 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resourses\player.png" />
+    <Content Include="Resourses\player.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resourses\back1.png" />
+    <Content Include="Resourses\back1.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resourses\block.png" />
     <Content Include="Resourses\finish_flag.png" />
     <Content Include="Resourses\player_an.png" />
+    <Content Include="Resourses\skeleton.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

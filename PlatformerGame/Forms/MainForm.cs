@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using PlatformerGame.GameObjects;
 using PlatformerGame.GameStates;
@@ -74,6 +75,13 @@ namespace PlatformerGame.Forms
             {
                 _player.Update(_level.Platforms);
                 _level.Update(_player.Position.X);
+
+                // Проверка на столкновение с ловушкой
+                if (_level.Traps.Any(trap => _player.GetBounds().IntersectsWith(trap)))
+                {
+                    GameOver();
+                    return;
+                }
 
                 if (_player.GetBounds().IntersectsWith(_level.FinishFlag))
                 {
@@ -164,7 +172,7 @@ namespace PlatformerGame.Forms
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            _currentState?.OnResize(e); 
+            _currentState?.OnResize(e);
             this.Invalidate();
         }
 

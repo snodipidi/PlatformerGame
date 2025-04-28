@@ -14,7 +14,7 @@ namespace PlatformerGame.GameStates
         private readonly Font _titleFont;
         private readonly Font _buttonFont;
         private readonly StringFormat _textFormat;
-         private Rectangle _rulesButton;
+        private Rectangle _rulesButton;
 
         public MainMenuState(MainForm form)
         {
@@ -50,7 +50,7 @@ namespace PlatformerGame.GameStates
         public void OnResize(EventArgs e)
         {
             UpdateButtonPositions();
-            _form.Invalidate(); 
+            _form.Invalidate();
         }
 
         public void Draw(Graphics g)
@@ -64,7 +64,7 @@ namespace PlatformerGame.GameStates
 
                 DrawButton(g, _startButton, "Начать игру", Brushes.LightGreen, Pens.DarkGreen);
                 DrawButton(g, _levelsButton, "Уровни", Brushes.LightBlue, Pens.DarkBlue);
-                DrawButton(g, _rulesButton, "Правила", Brushes.LightGoldenrodYellow, Pens.DarkGoldenrod); 
+                DrawButton(g, _rulesButton, "Правила", Brushes.LightGoldenrodYellow, Pens.DarkGoldenrod);
                 DrawButton(g, _exitButton, "Выход", Brushes.LightCoral, Pens.DarkRed);
             }
         }
@@ -86,7 +86,7 @@ namespace PlatformerGame.GameStates
             {
                 _form.ShowLevelsMenu();
             }
-            else if (_rulesButton.Contains(e.Location)) 
+            else if (_rulesButton.Contains(e.Location))
             {
                 _form.ShowRules();
             }

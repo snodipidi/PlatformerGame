@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace PlatformerGame.GameObjects
@@ -12,7 +13,6 @@ namespace PlatformerGame.GameObjects
         {
             InitializeLevels();
         }
-
         private void InitializeLevels()
         {
             _levels.Add(new LevelData
@@ -27,10 +27,16 @@ namespace PlatformerGame.GameObjects
             _levels.Add(new LevelData
             {
                 LevelNumber = 2,
-                IsLocked = true, // Начинаем заблокированным
+                IsLocked = true,
                 Length = 4500,
-                PlatformCount = 30,
-                Difficulty = 3
+                PlatformCount = 0, 
+                Difficulty = 3,
+                Traps = new List<Rectangle>
+        {
+            new Rectangle(1200, 400, 50, 20),
+            new Rectangle(2200, 350, 50, 20),
+            new Rectangle(3200, 300, 50, 20)
+        }
             });
         }
 

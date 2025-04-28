@@ -51,7 +51,7 @@ namespace PlatformerGame.GameStates
         public void OnResize(EventArgs e)
         {
             UpdateButtonPositions();
-            _form.Invalidate(); 
+            _form.Invalidate();
         }
 
         public void Draw(Graphics g)
