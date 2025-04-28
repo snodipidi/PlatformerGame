@@ -32,11 +32,26 @@ namespace PlatformerGame.GameObjects
                 PlatformCount = 0, 
                 Difficulty = 3,
                 Traps = new List<Rectangle>
-        {
-            new Rectangle(1200, 400, 50, 20),
-            new Rectangle(2200, 350, 50, 20),
-            new Rectangle(3200, 300, 50, 20)
-        }
+                {
+                    new Rectangle(1200, 400, 50, 20),
+                    new Rectangle(2200, 350, 50, 20),
+                    new Rectangle(3200, 300, 50, 20)
+                }
+            });
+
+            _levels.Add(new LevelData
+            {
+                LevelNumber = 3,
+                IsLocked = true,
+                Length = 5000,
+                PlatformCount = 25,
+                Difficulty = 5,
+                Enemies = new List<Enemy>
+                {
+                    new Enemy(1500, 300, 40, 30, 200, 3),
+                    new Enemy(2500, 400, 40, 30, 150, 4),
+                    new Enemy(3500, 350, 40, 30, 100, 2)
+                }
             });
         }
 

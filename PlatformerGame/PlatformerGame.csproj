@@ -102,6 +102,7 @@
     <Content Include="Resourses\block.png" />
     <Content Include="Resourses\finish_flag.png" />
     <Content Include="Resourses\player_an.png" />
+    <Content Include="Resourses\rules.png" />
     <Content Include="Resourses\skeleton.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

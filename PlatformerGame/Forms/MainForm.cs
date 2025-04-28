@@ -77,7 +77,7 @@ namespace PlatformerGame.Forms
                 _level.Update(_player.Position.X);
 
                 // Проверка на столкновение с ловушкой
-                if (_level.Traps.Any(trap => _player.GetBounds().IntersectsWith(trap)))
+                if (_level.Enemies.Any(enemy => _player.GetBounds().IntersectsWith(enemy.Bounds)))
                 {
                     GameOver();
                     return;

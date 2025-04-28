@@ -16,5 +16,6 @@ namespace PlatformerGame.GameObjects
         public int PlatformCount { get; set; }
         public int Difficulty { get; set; }
         public List<Rectangle> Traps { get; set; } = new List<Rectangle>();
+        public List<Enemy> Enemies { get; set; } = new List<Enemy>();
     }
 }

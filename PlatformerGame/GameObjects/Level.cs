@@ -18,6 +18,7 @@ namespace PlatformerGame.GameObjects
         public Bitmap FinishFlagTexture => _finishFlagTexture;
         public float StartPosition => StartPlatform.X + 50;
         public List<Rectangle> Traps { get; } = new List<Rectangle>();
+        public List<Enemy> Enemies { get; } = new List<Enemy>();
 
         private readonly Random random = new Random();
         private int lastPlatformX;
@@ -112,6 +113,11 @@ namespace PlatformerGame.GameObjects
 
             GenerateFinalPlatforms(data?.Difficulty ?? 1);
             CreateFinishFlag();
+
+            if (data?.Enemies != null)
+            {
+                Enemies.AddRange(data.Enemies);
+            }
         }
 
         private void GeneratePlatform(int difficulty)
@@ -158,6 +164,10 @@ namespace PlatformerGame.GameObjects
             CameraOffset = (int)(playerX - screenSize.Width / 3);
             int maxOffset = TotalLength - screenSize.Width;
             CameraOffset = Math.Min(maxOffset, Math.Max(0, CameraOffset));
+            foreach (var enemy in Enemies)
+            {
+                enemy.Update();
+            }
         }
 
         public void CheckCompletion(Player player)
@@ -210,6 +220,11 @@ namespace PlatformerGame.GameObjects
             };
                     g.FillPolygon(Brushes.Black, spike);
                 }
+            }
+
+            foreach (var enemy in Enemies)
+            {
+                enemy.Draw(g);
             }
         }
 

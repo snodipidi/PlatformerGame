@@ -9,8 +9,7 @@ namespace PlatformerGame.GameStates
     {
         private readonly MainForm _form;
         private Rectangle _backButton;
-        private readonly Font _titleFont = new Font("Arial", 32, FontStyle.Bold);
-        private readonly Font _textFont = new Font("Arial", 14);
+        private Bitmap _rulesImage;
         private readonly StringFormat _centerFormat = new StringFormat
         {
             Alignment = StringAlignment.Center,
@@ -20,16 +19,25 @@ namespace PlatformerGame.GameStates
         public RulesState(MainForm form)
         {
             _form = form;
+            try
+            {
+                // Загружаем изображение правил
+                _rulesImage = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\rules.png");
+            }
+            catch
+            {
+                // Если изображение не загрузилось, можно добавить fallback
+                _rulesImage = null;
+            }
             UpdateButtonPosition();
         }
 
         private void UpdateButtonPosition()
         {
-            // Центрируем кнопку по горизонтали
             int buttonWidth = 200;
             _backButton = new Rectangle(
-                (_form.ClientSize.Width - buttonWidth) / 2, // Центральное положение
-                _form.ClientSize.Height - 100, // 100px от нижнего края
+                (_form.ClientSize.Width - buttonWidth) / 2,
+                _form.ClientSize.Height - 100,
                 buttonWidth,
                 50);
         }
@@ -42,38 +50,68 @@ namespace PlatformerGame.GameStates
 
         public void Draw(Graphics g)
         {
-            // Полупрозрачный темный фон
+            // Полупрозрачный фон
             g.FillRectangle(new SolidBrush(Color.FromArgb(220, 0, 0, 50)),
                 new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height));
 
-            // Заголовок (центрированный)
-            g.DrawString("Правила игры", _titleFont, Brushes.Gold,
-                new RectangleF(0, 50, _form.ClientSize.Width, 60),
-                _centerFormat);
+            // Объявляем переменные до блока if
+            int width = 0;
+            int height = 0;
+            bool imageLoaded = _rulesImage != null;
 
-            // Основной текст (центрированный)
-            string rulesText =
-                "Управление:\n\n" +
-                "← → - Движение влево/вправо\n" +
-                "Space (Пробел) - Прыжок\n" +
-                "Зажать Space (Пробел) - двойной прыжок\n" +
-                "F11 - Полноэкранный режим\n" +
-                "Esc - Выход в меню\n\n" +
-                "Цель игры:\n" +
-                "Достигнуть флажка в конце уровня!";
+            if (imageLoaded)
+            {
+                // Рассчитываем пропорции
+                float imageAspect = (float)_rulesImage.Width / _rulesImage.Height;
+                float screenAspect = (float)_form.ClientSize.Width / _form.ClientSize.Height;
 
-            RectangleF textRect = new RectangleF(
-                _form.ClientSize.Width * 0.1f, // 10% отступ слева
-                150,                           // Отступ сверху
-                _form.ClientSize.Width * 0.8f, // 80% ширины
-                _form.ClientSize.Height - 300); // Высота
+                // Выбираем способ масштабирования
+                if (imageAspect > screenAspect)
+                {
+                    // Ширина ограничивающий фактор
+                    width = (int)(_form.ClientSize.Width * 0.9f);
+                    height = (int)(width / imageAspect);
+                }
+                else
+                {
+                    // Высота ограничивающий фактор
+                    height = (int)(_form.ClientSize.Height * 0.7f);
+                    width = (int)(height * imageAspect);
+                }
 
-            g.DrawString(rulesText, _textFont, Brushes.White, textRect, _centerFormat);
+                // Позиционируем по центру
+                Rectangle imageRect = new Rectangle(
+                    (_form.ClientSize.Width - width) / 2,
+                    20, // Отступ сверху
+                    width,
+                    height);
 
-            // Кнопка "Назад" (уже центрирована через UpdateButtonPosition)
+                // Рисуем сглаженное изображение
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.DrawImage(_rulesImage, imageRect);
+            }
+            else
+            {
+                // Fallback текст
+                string errorText = "Изображение правил не загружено";
+                g.DrawString(errorText, new Font("Arial", 14), Brushes.White,
+                    new RectangleF(0, 50, _form.ClientSize.Width, 40), _centerFormat);
+            }
+
+            // Кнопка "Назад" (теперь переменные width и height доступны)
+            int buttonY = imageLoaded
+                ? Math.Min(_form.ClientSize.Height - 100, 20 + height + 40)
+                : _form.ClientSize.Height - 100;
+
+            _backButton = new Rectangle(
+                (_form.ClientSize.Width - 200) / 2,
+                buttonY,
+                200,
+                50);
+
             g.FillRectangle(Brushes.LightGray, _backButton);
             g.DrawRectangle(Pens.DarkGray, _backButton);
-            g.DrawString("Назад (Esc)", _textFont, Brushes.Black, _backButton, _centerFormat);
+            g.DrawString("Назад (Esc)", new Font("Arial", 12), Brushes.Black, _backButton, _centerFormat);
         }
 
         public void HandleMouseClick(MouseEventArgs e)
@@ -101,9 +139,9 @@ namespace PlatformerGame.GameStates
 
         public void OnExit()
         {
-            _titleFont.Dispose();
-            _textFont.Dispose();
+            _rulesImage?.Dispose();
             _centerFormat.Dispose();
+            
         }
     }
 }
