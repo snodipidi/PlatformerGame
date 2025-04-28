@@ -61,46 +61,53 @@ namespace PlatformerGame.GameObjects
             Platforms.Add(StartPlatform);
             lastPlatformX = StartPlatform.Right;
 
-            if (data?.LevelNumber == 2) // Полностью фиксированный 2 уровень
+            if (data?.LevelNumber == 2) // Генерация для 2 уровня
             {
-                // Основные параметры уровня
                 int groundY = screenSize.Height - 100;
                 int platformHeight = 20;
+                int platformWidth = 300; // Ширина всех платформ
+                int trapWidth = 100;    // Ширина ловушки
+                int trapHeight = 25;    // Высота ловушки
 
-                // 1. Стартовая зона (безопасная)
-                Platforms.Add(new Rectangle(300, groundY - 50, 200, platformHeight));
-                Platforms.Add(new Rectangle(550, groundY - 100, 150, platformHeight));
+                // 1. Стартовая безопасная зона
+                Platforms.Add(new Rectangle(300, groundY - 50, platformWidth, platformHeight));
+                Platforms.Add(new Rectangle(650, groundY - 100, platformWidth, platformHeight));
 
-                // 2. Первая опасная зона (3 платформы с ловушками)
-                int trapSectionY = groundY - 150;
-                Platforms.Add(new Rectangle(800, trapSectionY, 200, platformHeight));
-                Traps.Add(new Rectangle(850, trapSectionY - 20, 100, 20)); // Ловушка сверху
+                // 2. Первая платформа с ловушкой по центру
+                int platform1Y = groundY - 150;
+                Platforms.Add(new Rectangle(1000, platform1Y, platformWidth, platformHeight));
+                Traps.Add(new Rectangle(
+                    1000 + (platformWidth - trapWidth) / 2, // Центрирование
+                    platform1Y - trapHeight,
+                    trapWidth,
+                    trapHeight));
 
-                Platforms.Add(new Rectangle(1100, trapSectionY + 50, 200, platformHeight));
-                Traps.Add(new Rectangle(1150, trapSectionY + 30, 100, 20));
+                // 3. Вторая платформа с ловушкой по центру
+                int platform2Y = groundY - 130;
+                Platforms.Add(new Rectangle(1600, platform2Y, platformWidth, platformHeight));
+                Traps.Add(new Rectangle(
+                    1600 + (platformWidth - trapWidth) / 2,
+                    platform2Y - trapHeight,
+                    trapWidth,
+                    trapHeight));
 
-                Platforms.Add(new Rectangle(1400, trapSectionY, 200, platformHeight));
-                Traps.Add(new Rectangle(1450, trapSectionY - 20, 100, 20));
+                // 4. Третья платформа с ловушкой по центру
+                int platform3Y = groundY - 170;
+                Platforms.Add(new Rectangle(2200, platform3Y, platformWidth, platformHeight));
+                Traps.Add(new Rectangle(
+                    2200 + (platformWidth - trapWidth) / 2,
+                    platform3Y - trapHeight,
+                    trapWidth,
+                    trapHeight));
 
-                // 3. Безопасная зона для передышки
-                Platforms.Add(new Rectangle(1700, groundY - 80, 300, platformHeight));
+                // 5. Финальные безопасные платформы
+                Platforms.Add(new Rectangle(2800, groundY - 100, platformWidth, platformHeight));
+                Platforms.Add(new Rectangle(3200, groundY - 80, platformWidth, platformHeight));
 
-                // 4. Вторая опасная зона (движущиеся платформы с ловушками)
-                Platforms.Add(new Rectangle(2100, groundY - 200, 150, platformHeight));
-                Traps.Add(new Rectangle(2125, groundY - 220, 100, 20));
-
-                Platforms.Add(new Rectangle(2300, groundY - 150, 150, platformHeight));
-                Traps.Add(new Rectangle(2325, groundY - 170, 100, 20));
-
-                // 5. Финальный отрезок к флагу
-                Platforms.Add(new Rectangle(2600, groundY - 100, 200, platformHeight));
-                Platforms.Add(new Rectangle(2900, groundY - 150, 200, platformHeight));
-                Platforms.Add(new Rectangle(3200, groundY - 80, 200, platformHeight));
-
-                // Фиксируем общую длину уровня
-                TotalLength = 3500;
+                TotalLength = 3800;
                 lastPlatformX = TotalLength;
             }
+
             else
             {
                 // Обычная генерация для других уровней
@@ -114,9 +121,44 @@ namespace PlatformerGame.GameObjects
             GenerateFinalPlatforms(data?.Difficulty ?? 1);
             CreateFinishFlag();
 
-            if (data?.Enemies != null)
+            if (data?.LevelNumber == 3) // Полностью фиксированный 3 уровень
             {
-                Enemies.AddRange(data.Enemies);
+                int groundY = screenSize.Height - 100;
+                int platformHeight = 20;
+
+                // 1. Стартовая зона (безопасная)
+                Platforms.Add(new Rectangle(300, groundY - 50, 200, platformHeight));
+                Platforms.Add(new Rectangle(550, groundY - 100, 150, platformHeight));
+
+                // 2. Первая опасная зона с врагом
+                int enemy1Y = groundY - 150;
+                Platforms.Add(new Rectangle(1000, enemy1Y, 300, platformHeight));
+                Enemies.Add(new Enemy(1050, enemy1Y + platformHeight, 40, 30, 200, 3));
+
+                // 3. Промежуточные платформы
+                Platforms.Add(new Rectangle(1400, groundY - 80, 200, platformHeight));
+                Platforms.Add(new Rectangle(1700, groundY - 120, 150, platformHeight));
+
+                // 4. Вторая опасная зона с врагом
+                int enemy2Y = groundY - 180;
+                Platforms.Add(new Rectangle(2100, enemy2Y, 250, platformHeight));
+                Enemies.Add(new Enemy(2150, enemy2Y + platformHeight, 50, 40, 150, 4));
+
+                // 5. Сложный прыжковый участок
+                Platforms.Add(new Rectangle(2500, groundY - 200, 100, platformHeight));
+                Platforms.Add(new Rectangle(2700, groundY - 220, 100, platformHeight));
+
+                // 6. Третья опасная зона с врагом
+                int enemy3Y = groundY - 160;
+                Platforms.Add(new Rectangle(3100, enemy3Y, 300, platformHeight));
+                Enemies.Add(new Enemy(3150, enemy3Y + platformHeight, 60, 30, 100, 2));
+
+                // 7. Финальные платформы
+                Platforms.Add(new Rectangle(3500, groundY - 100, 200, platformHeight));
+                Platforms.Add(new Rectangle(3800, groundY - 70, 250, platformHeight));
+
+                TotalLength = 4200;
+                lastPlatformX = TotalLength;
             }
         }
 
@@ -226,6 +268,38 @@ namespace PlatformerGame.GameObjects
             {
                 enemy.Draw(g);
             }
+        }
+
+        public bool CheckPlayerCollision(Player player)
+        {
+            var playerBounds = player.GetBounds();
+
+            // Проверка столкновения с ловушками
+            foreach (var trap in Traps)
+            {
+                // Увеличиваем зону поражения на 5px сверху для надежности
+                Rectangle trapKillZone = new Rectangle(
+                    trap.X,
+                    trap.Y - 5,
+                    trap.Width,
+                    trap.Height + 5);
+
+                if (playerBounds.IntersectsWith(trapKillZone))
+                {
+                    return true;
+                }
+            }
+
+            // Проверка столкновения с врагами
+            foreach (var enemy in Enemies)
+            {
+                if (playerBounds.IntersectsWith(enemy.Bounds))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void DrawTexturedPlatform(Graphics g, Rectangle platform)

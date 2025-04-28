@@ -76,8 +76,8 @@ namespace PlatformerGame.Forms
                 _player.Update(_level.Platforms);
                 _level.Update(_player.Position.X);
 
-                // Проверка на столкновение с ловушкой
-                if (_level.Enemies.Any(enemy => _player.GetBounds().IntersectsWith(enemy.Bounds)))
+                // Проверка всех опасных столкновений
+                if (_level.CheckPlayerCollision(_player) || _player.HasFallen(ClientSize.Height))
                 {
                     GameOver();
                     return;
@@ -85,12 +85,8 @@ namespace PlatformerGame.Forms
 
                 if (_player.GetBounds().IntersectsWith(_level.FinishFlag))
                 {
-                    _level.CameraOffset = _level.TotalLength - this.ClientSize.Width;
                     CompleteLevel();
-                }
-                else if (_player.HasFallen(ClientSize.Height))
-                {
-                    GameOver();
+                    return;
                 }
 
                 this.Invalidate();

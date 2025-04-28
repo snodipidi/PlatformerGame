@@ -107,8 +107,8 @@ namespace PlatformerGame.GameStates
             {
                 if (_levelButtons[i].Contains(e.Location) && !levels[i].IsLocked)
                 {
-                    _levelManager.SetCurrentLevel(i);
-                    _form.StartNewGame(); // Используем публичный метод вместо StartLevel
+                    _levelManager.SetCurrentLevel(levels[i].LevelNumber);
+                    _form.StartNewGame();
                     return;
                 }
             }

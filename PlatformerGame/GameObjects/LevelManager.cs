@@ -47,17 +47,28 @@ namespace PlatformerGame.GameObjects
                 PlatformCount = 25,
                 Difficulty = 5,
                 Enemies = new List<Enemy>
-                {
-                    new Enemy(1500, 300, 40, 30, 200, 3),
-                    new Enemy(2500, 400, 40, 30, 150, 4),
-                    new Enemy(3500, 350, 40, 30, 100, 2)
-                }
+        {
+            new Enemy(1500, 400, 40, 30, 200, 3),
+            new Enemy(2500, 350, 40, 30, 150, 4),
+            new Enemy(3500, 300, 40, 30, 100, 2)
+        }
             });
         }
 
         public LevelData GetCurrentLevel() => _levels[_currentLevelIndex];
 
-        public List<LevelData> GetAllLevels() => _levels.ToList();
+        public List<LevelData> GetAllLevels()
+        {
+            // Временное отключение блокировки для тестов
+            return _levels.Select(level =>
+            {
+                level.IsLocked = false; // Разблокируем все уровни
+                return level;
+            }).ToList();
+
+            // Для рабочей версии замените на:
+            // return _levels.ToList();
+        }
 
         public void SetCurrentLevel(int levelNumber)
         {
