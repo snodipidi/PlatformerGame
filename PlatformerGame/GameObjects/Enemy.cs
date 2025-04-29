@@ -3,15 +3,53 @@ using System.Drawing;
 
 namespace PlatformerGame.GameObjects
 {
+    /// <summary>
+    /// Представляет вражеского персонажа в платформенной игре.
+    /// </summary>
     public class Enemy
     {
+        /// <summary>
+        /// Возвращает прямоугольные границы врага.
+        /// </summary>
+        /// <value>
+        /// <see cref="Rectangle"/>, представляющий позицию и размер врага.
+        /// </value>
         public Rectangle Bounds { get; private set; }
-        private readonly int _moveRange;
-        private readonly int _speed;
-        private int _direction = 1;
-        private readonly int _originalX;
-        private readonly int _platformY; // Y-координата платформы
 
+        /// <summary>
+        /// Диапазон, в пределах которого враг может двигаться.
+        /// </summary>
+        private readonly int _moveRange;
+
+        /// <summary>
+        /// Скорость, с которой двигается враг.
+        /// </summary>
+        private readonly int _speed;
+
+        /// <summary>
+        /// Направление, в котором враг в данный момент двигается (1 - вправо, -1 - влево).
+        /// </summary>
+        private int _direction = 1;
+
+        /// <summary>
+        /// Исходная X-координата врага, используемая в качестве точки отсчета для диапазона движения.
+        /// </summary>
+        private readonly int _originalX;
+
+        /// <summary>
+        /// Y-координата платформы, на которой стоит враг.
+        /// </summary>
+        private readonly int _platformY;
+
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="Enemy"/>.
+        /// </summary>
+        /// <param name="x">Начальная X-координата врага.</param>
+        /// <param name="platformY">Y-координата платформы, на которой стоит враг.</param>
+        /// <param name="width">Ширина врага.</param>
+        /// <param name="height">Высота врага.</param>
+        /// <param name="moveRange">Диапазон, в пределах которого враг может двигаться по горизонтали.</param>
+        /// <param name="speed">Скорость, с которой двигается враг.</param>
         public Enemy(int x, int platformY, int width, int height, int moveRange, int speed)
         {
             _platformY = platformY;
@@ -21,6 +59,9 @@ namespace PlatformerGame.GameObjects
             _originalX = x;
         }
 
+        /// <summary>
+        /// Обновляет позицию врага на основе его скорости и направления, удерживая его в пределах заданного диапазона движения.
+        /// </summary>
         public void Update()
         {
             // Движение врага в пределах диапазона
@@ -35,6 +76,10 @@ namespace PlatformerGame.GameObjects
             Bounds = new Rectangle(newX, _platformY - Bounds.Height, Bounds.Width, Bounds.Height);
         }
 
+        /// <summary>
+        /// Рисует врага на экране.
+        /// </summary>
+        /// <param name="g">Объект <see cref="Graphics"/>, используемый для рисования.</param>
         public void Draw(Graphics g)
         {
             // Тело врага

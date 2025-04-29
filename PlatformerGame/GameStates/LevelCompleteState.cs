@@ -27,25 +27,21 @@ namespace PlatformerGame.GameStates
         private void UpdateButtonPositions()
         {
             int centerX = _form.ClientSize.Width / 2;
-            int centerY = _form.ClientSize.Height / 2;
 
-            _retryButton = new Rectangle(
-                centerX - 100,
-                centerY - 20, // Подняли кнопки выше
-                200,
-                50);
+            // Предварительно измеряем размер текста
+            using (var testFont = new Font("Arial", 32, FontStyle.Bold))
+            {
+                var textSize = _form.CreateGraphics().MeasureString(
+                    $"Уровень {_levelManager.GetCurrentLevel().LevelNumber} пройден!",
+                    testFont);
 
-            _nextButton = new Rectangle(
-                centerX - 100,
-                centerY + 50,
-                200,
-                50);
+                // Позиционируем кнопки с учетом высоты текста
+                int baseY = (int)(_form.ClientSize.Height * 0.15f + textSize.Height + 40);
 
-            _menuButton = new Rectangle(
-                centerX - 100,
-                centerY + 120,
-                200,
-                50);
+                _retryButton = new Rectangle(centerX - 100, baseY, 200, 50);
+                _nextButton = new Rectangle(centerX - 100, baseY + 70, 200, 50);
+                _menuButton = new Rectangle(centerX - 100, baseY + 140, 200, 50);
+            }
         }
 
         public void OnResize(EventArgs e)
@@ -60,24 +56,31 @@ namespace PlatformerGame.GameStates
             g.FillRectangle(new SolidBrush(Color.FromArgb(220, 0, 0, 80)),
                 new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height));
 
-            // Заголовок
+            // Заголовок (подняли выше)
             string title = $"Уровень {_levelManager.GetCurrentLevel().LevelNumber} пройден!";
-            var titleSize = g.MeasureString(title, _titleFont);
-            g.DrawString(title, _titleFont, Brushes.Gold,
-                (_form.ClientSize.Width - titleSize.Width) / 2,
-                _form.ClientSize.Height / 2 - 60);
+            var titleFont = new Font("Arial", 32, FontStyle.Bold);
+            var titleSize = g.MeasureString(title, titleFont);
 
-            // Кнопки
+            // Поднимаем текст на 20% выше (было 60, стало 100)
+            float titleY = _form.ClientSize.Height * 0.15f; // 15% от верха вместо фиксированного значения
+            g.DrawString(title, titleFont, Brushes.Gold,
+                (_form.ClientSize.Width - titleSize.Width) / 2,
+                titleY);
+
+            // Кнопки (оставляем отступ от текста)
+            float buttonsStartY = titleY + titleSize.Height + 40; // Отступ от текста
+
             DrawButton(g, _retryButton, "Повторить (R)", Brushes.LightGreen, Pens.DarkGreen);
 
-            // Показываем кнопку следующего уровня только если он есть
-            if (_levelManager.GetCurrentLevel().LevelNumber < _levelManager.GetAllLevels().Count)
+            if (_levelManager.HasNextLevel())
             {
-                DrawButton(g, _nextButton, $"Уровень {_levelManager.GetCurrentLevel().LevelNumber + 1} (N)",
+                DrawButton(g, _nextButton, $"Следующий уровень (N)",
                     Brushes.LightBlue, Pens.DarkBlue);
             }
 
             DrawButton(g, _menuButton, "В меню (M)", Brushes.LightCoral, Pens.DarkRed);
+
+            titleFont.Dispose();
         }
 
         private void DrawButton(Graphics g, Rectangle rect, string text, Brush fill, Pen border)
