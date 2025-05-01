@@ -23,6 +23,7 @@ namespace PlatformerGame.Forms
         public MainForm()
         {
             InitializeComponent();
+            this.DoubleBuffered = true;
             this.ClientSize = new Size(800, 600);
 
             try
@@ -86,6 +87,12 @@ namespace PlatformerGame.Forms
                 if (_player.GetBounds().IntersectsWith(_level.FinishFlag))
                 {
                     CompleteLevel();
+                    return;
+                }
+
+                if (_level.CheckPlayerCollision(_player) || _player.HasFallen(ClientSize.Height))
+                {
+                    GameOver();
                     return;
                 }
 

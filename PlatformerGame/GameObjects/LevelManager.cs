@@ -9,12 +9,22 @@ namespace PlatformerGame.GameObjects
         private List<LevelData> _levels = new List<LevelData>();
         private int _currentLevelIndex = 0;
 
+        public class EnemyInfo
+        {
+            public int X { get; set; }
+            public int PlatformY { get; set; } // Относительно groundY
+            public int MoveRange { get; set; }
+            public int Speed { get; set; }
+        }
+
         public LevelManager()
         {
             InitializeLevels();
         }
+
         private void InitializeLevels()
         {
+            // Уровень 1
             _levels.Add(new LevelData
             {
                 LevelNumber = 1,
@@ -24,34 +34,50 @@ namespace PlatformerGame.GameObjects
                 Difficulty = 1
             });
 
+            // Уровень 2 (с ловушками)
             _levels.Add(new LevelData
             {
                 LevelNumber = 2,
                 IsLocked = true,
                 Length = 4500,
-                PlatformCount = 0, 
+                PlatformCount = 0,
                 Difficulty = 3,
                 Traps = new List<Rectangle>
                 {
-                    new Rectangle(1200, 400, 50, 20),
-                    new Rectangle(2200, 350, 50, 20),
-                    new Rectangle(3200, 300, 50, 20)
+                    new Rectangle(1200, 400, 100, 25),
+                    new Rectangle(2200, 350, 100, 25),
+                    new Rectangle(3200, 300, 100, 25)
                 }
             });
 
-            _levels.Add(new LevelData
+            // Уровень 3 (с врагами)
+            var level3 = new LevelData
             {
                 LevelNumber = 3,
                 IsLocked = true,
+                Length = 4000,
+                PlatformCount = 0,
+                Difficulty = 5
+            };
+
+            // Добавляем информацию о врагах через EnemyInfo
+            level3.EnemyInfos = new List<EnemyInfo>
+            {
+                new EnemyInfo { X = 950, PlatformY = -120, MoveRange = 150, Speed = 3 },
+                new EnemyInfo { X = 1950, PlatformY = -200, MoveRange = 120, Speed = 4 },
+                new EnemyInfo { X = 3250, PlatformY = -130, MoveRange = 100, Speed = 2 }
+            };
+            _levels.Add(level3);
+
+            // Уровень 4 (с колоннами)
+            _levels.Add(new LevelData
+            {
+                LevelNumber = 4,
+                IsLocked = true,
                 Length = 5000,
-                PlatformCount = 25,
-                Difficulty = 5,
-                Enemies = new List<Enemy>
-        {
-            new Enemy(1500, 400, 40, 30, 200, 3),
-            new Enemy(2500, 350, 40, 30, 150, 4),
-            new Enemy(3500, 300, 40, 30, 100, 2)
-        }
+                PlatformCount = 0,
+                Difficulty = 7,
+                Description = "Уровень с движущимися колоннами"
             });
         }
 
@@ -59,14 +85,14 @@ namespace PlatformerGame.GameObjects
 
         public List<LevelData> GetAllLevels()
         {
-            // Временное отключение блокировки для тестов
-            return _levels.Select(level =>
+            // Для теста разблокируем все уровни
+            foreach (var level in _levels)
             {
-                level.IsLocked = false; // Разблокируем все уровни
-                return level;
-            }).ToList();
+                level.IsLocked = false;
+            }
+            return _levels.ToList();
 
-            // Для рабочей версии замените на:
+            // В боевой версии:
             // return _levels.ToList();
         }
 

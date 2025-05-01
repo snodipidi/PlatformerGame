@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using static PlatformerGame.GameObjects.LevelManager;
 
 namespace PlatformerGame.GameObjects
 {
@@ -17,5 +18,6 @@ namespace PlatformerGame.GameObjects
         public int Difficulty { get; set; }
         public List<Rectangle> Traps { get; set; } = new List<Rectangle>();
         public List<Enemy> Enemies { get; set; } = new List<Enemy>();
+        public List<EnemyInfo> EnemyInfos { get; set; } = new List<EnemyInfo>(); // Новое свойство
     }
 }
