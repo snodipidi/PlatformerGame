@@ -126,35 +126,49 @@ namespace PlatformerGame.GameObjects
             {
                 int groundY = screenSize.Height - 100;
                 int platformHeight = 20;
+                int spikesHeight = 25;
 
-                // 1. Стартовая зона
+                // 1. Стартовая зона (2 платформы)
                 Platforms.Add(new Rectangle(300, groundY - 50, 200, platformHeight));
                 Platforms.Add(new Rectangle(550, groundY - 100, 180, platformHeight));
 
-                // 2. Первый враг
-                Platforms.Add(new Rectangle(900, groundY - 120, 220, platformHeight));
-                Enemies.Add(new Enemy(950, groundY - 120 + platformHeight, 150, 3));
+                // 2. Первый враг (единственный)
+                int enemyPlatformY = groundY - 120;
+                Platforms.Add(new Rectangle(900, enemyPlatformY, 220, platformHeight));
+                Enemies.Add(new Enemy(
+                    950,                    // X позиция
+                    enemyPlatformY,         // Y верхнего края платформы
+                    150,                    // Диапазон движения
+                    3));                    // Скорость
 
-                // 3. Промежуточные платформы
-                Platforms.Add(new Rectangle(1300, groundY - 150, 120, platformHeight));
-                Platforms.Add(new Rectangle(1500, groundY - 180, 120, platformHeight));
+                // 3. Первые шипы (удлиненная платформа)
+                int spikes1PlatformY = groundY - 100;
+                int spikes1PlatformWidth = 250; // Увеличили ширину
+                Platforms.Add(new Rectangle(1300, spikes1PlatformY, spikes1PlatformWidth, platformHeight));
+                Traps.Add(new Rectangle(
+                    1300 + (spikes1PlatformWidth - 100) / 2, // Центрируем шипы
+                    spikes1PlatformY - spikesHeight,
+                    100,  // Ширина шипов
+                    spikesHeight));
 
-                // 4. Второй враг
-                Platforms.Add(new Rectangle(1900, groundY - 200, 200, platformHeight));
-                Enemies.Add(new Enemy(1950, groundY - 200 + platformHeight, 120, 4));
+                // 4. Вторые шипы (удлиненная платформа)
+                int spikes2PlatformY = groundY - 100;
+                int spikes2PlatformWidth = 300; // Увеличили ширину
+                Platforms.Add(new Rectangle(1700, spikes2PlatformY, spikes2PlatformWidth, platformHeight));
+                Traps.Add(new Rectangle(
+                    1700 + (spikes2PlatformWidth - 100) / 2,
+                    spikes2PlatformY - spikesHeight,
+                    100,  // Ширина шипов
+                    spikesHeight));
 
-                // 5. Широкие платформы
-                Platforms.Add(new Rectangle(2300, groundY - 150, 300, platformHeight));
-                Platforms.Add(new Rectangle(2700, groundY - 100, 250, platformHeight));
+                // 5. Широкие платформы для передышки
+                Platforms.Add(new Rectangle(2200, groundY - 120, 350, platformHeight));
+                Platforms.Add(new Rectangle(2650, groundY - 80, 300, platformHeight));
 
-                // 6. Финальный враг
-                Platforms.Add(new Rectangle(3200, groundY - 130, 200, platformHeight));
-                Enemies.Add(new Enemy(3250, groundY - 130 + platformHeight, 100, 2));
+                // 6. Финишная платформа
+                Platforms.Add(new Rectangle(3050, groundY - 60, 250, platformHeight));
 
-                // Финиш
-                Platforms.Add(new Rectangle(3600, groundY - 80, 200, platformHeight));
-
-                TotalLength = 4000;
+                TotalLength = 3500; // Немного увеличили длину
                 lastPlatformX = TotalLength;
             }
 

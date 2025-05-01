@@ -14,7 +14,7 @@ namespace PlatformerGame.GameObjects
         private const int Width = 45;  // Ширина после масштабирования
         private const int Height = 70; // Высота после масштабирования
 
-        public Enemy(int x, int y, int moveRange, int speed)
+        public Enemy(int x, int platformTopY, int moveRange, int speed)
         {
             try
             {
@@ -25,7 +25,7 @@ namespace PlatformerGame.GameObjects
                 _sprite = null;
             }
 
-            Bounds = new Rectangle(x, y - Height, Width, Height);
+            Bounds = new Rectangle(x, platformTopY - Height, Width, Height);
             _moveRange = moveRange;
             _speed = speed;
             _originalX = x;
