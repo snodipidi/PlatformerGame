@@ -172,26 +172,69 @@ namespace PlatformerGame.GameObjects
                 lastPlatformX = TotalLength;
             }
 
-            if (data?.LevelNumber == 4) // Генерация 4 уровня
+            if (data?.LevelNumber == 4) // Генерация 4 уровня с фиксированными платформами
             {
                 int groundY = screenSize.Height - 100;
                 int platformHeight = 20;
-                Platforms.Add(new Rectangle(300, groundY - 50, 250, platformHeight));
-                Platforms.Add(new Rectangle(600, groundY - 100, 200, platformHeight));
-                Platforms.Add(new Rectangle(1000, groundY - 120, 200, platformHeight));
-                ColumnEnemies.Add(new ColumnEnemy(
-                    1100, groundY - 120, // Позиция платформы
-                    30, 80, // Ширина и высота колонны
-                    50, 2)); // Диапазон и скорость
-                Platforms.Add(new Rectangle(1500, groundY - 80, 180, platformHeight));
-                Platforms.Add(new Rectangle(1800, groundY - 150, 150, platformHeight));
-                Platforms.Add(new Rectangle(2300, groundY - 100, 300, platformHeight));
-                ColumnEnemies.Add(new ColumnEnemy(2350, groundY - 100, 25, 100, 60, 3));
-                ColumnEnemies.Add(new ColumnEnemy(2450, groundY - 100, 25, 100, 40, 2));
-                Platforms.Add(new Rectangle(3000, groundY - 120, 200, platformHeight));
-                Platforms.Add(new Rectangle(3300, groundY - 70, 250, platformHeight));
+                int spikesHeight = 25;
+                int platformWidth = 200;
 
-                TotalLength = 4000;
+                // 1. Стартовая зона (3 платформы)
+                Platforms.Add(new Rectangle(300, groundY - 50, platformWidth, platformHeight));
+                Platforms.Add(new Rectangle(600, groundY - 100, platformWidth, platformHeight));
+                Platforms.Add(new Rectangle(900, groundY - 80, platformWidth, platformHeight));
+
+                // 2. Первая колонна с платформой
+                int column1X = 1200;
+                Platforms.Add(new Rectangle(column1X, groundY - 120, platformWidth, platformHeight));
+                ColumnEnemies.Add(new ColumnEnemy(
+                    column1X + platformWidth / 2, // Центр платформы
+                    groundY - 120,
+                    30,  // Ширина колонны
+                    150, // Высота колонны
+                    120, // Диапазон движения
+                    2    // Скорость
+                ));
+
+                // 3. Шипы после первой колонны
+                Platforms.Add(new Rectangle(1600, groundY - 100, platformWidth, platformHeight));
+                Traps.Add(new Rectangle(
+                    1600 + (platformWidth - 100) / 2, // Центрированные шипы
+                    groundY - 100 - spikesHeight,
+                    100, // Ширина шипов
+                    spikesHeight
+                ));
+
+                // 4. Враг на отдельной платформе
+                int enemyPlatformX = 2000;
+                Platforms.Add(new Rectangle(enemyPlatformX, groundY - 150, platformWidth, platformHeight));
+                Enemies.Add(new Enemy(
+                    enemyPlatformX + 20, // Позиция X
+                    groundY - 150,      // Y платформы
+                    100,                // Диапазон движения
+                    2                   // Скорость
+                ));
+
+                // 5. Вторая колонна с платформой
+                int column2X = 2500;
+                Platforms.Add(new Rectangle(column2X, groundY - 80, platformWidth, platformHeight));
+                ColumnEnemies.Add(new ColumnEnemy(
+                    column2X + platformWidth / 2,
+                    groundY - 80,
+                    35, 180, 150, 3 // Более высокая и быстрая колонна
+                ));
+
+                // 6. Финальные платформы с шипами
+                Platforms.Add(new Rectangle(3000, groundY - 100, platformWidth, platformHeight));
+                Traps.Add(new Rectangle(
+                    3000 + (platformWidth - 120) / 2,
+                    groundY - 100 - spikesHeight,
+                    120,
+                    spikesHeight
+                ));
+                Platforms.Add(new Rectangle(3400, groundY - 60, 250, platformHeight));
+
+                TotalLength = 3800;
                 lastPlatformX = TotalLength;
             }
         }
@@ -286,19 +329,23 @@ namespace PlatformerGame.GameObjects
                 g.DrawRectangle(Pens.DarkRed, FinishFlag);
             }
 
+            // После отрисовки платформ:
             foreach (var trap in Traps)
             {
-                int spikeCount = 5;
+                int spikeCount = trap.Width / 20; // По шипу каждые 20px
                 int spikeWidth = trap.Width / spikeCount;
 
-                for (int i = 0; i < spikeCount; i++)
+                using (var spikeBrush = new SolidBrush(Color.DarkRed))
                 {
-                    Point[] spike = {
-                new Point(trap.X + i * spikeWidth, trap.Y + trap.Height), 
-                new Point(trap.X + (i + 1) * spikeWidth, trap.Y + trap.Height), 
-                new Point(trap.X + i * spikeWidth + spikeWidth/2, trap.Y) 
-            };
-                    g.FillPolygon(Brushes.Black, spike);
+                    for (int i = 0; i < spikeCount; i++)
+                    {
+                        Point[] spike = {
+                        new Point(trap.X + i * spikeWidth, trap.Bottom),
+                        new Point(trap.X + (i + 1) * spikeWidth, trap.Bottom),
+                        new Point(trap.X + i * spikeWidth + spikeWidth/2, trap.Top)
+                        };
+                        g.FillPolygon(spikeBrush, spike);
+                    }
                 }
             }
 
