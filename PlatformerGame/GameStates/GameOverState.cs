@@ -108,7 +108,10 @@ namespace PlatformerGame.GameStates
             }
         }
 
-        public void OnEnter() { }
+        public void OnEnter() {
+            SoundManager.PlayGameOverSound();
+            
+        }
         public void OnExit() { }
     }
 }

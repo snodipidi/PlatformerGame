@@ -134,7 +134,9 @@ namespace PlatformerGame.GameStates
         }
 
         public void Update() { }
-        public void OnEnter() { }
+        public void OnEnter() {
+            SoundManager.PlayWinSound();
+        }
         public void OnExit()
         {
             _titleFont.Dispose();

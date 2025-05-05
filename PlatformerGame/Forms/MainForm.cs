@@ -23,6 +23,7 @@ namespace PlatformerGame.Forms
         public MainForm()
         {
             InitializeComponent();
+            SoundManager.Initialize();
             this.DoubleBuffered = true;
             this.ClientSize = new Size(800, 600);
 

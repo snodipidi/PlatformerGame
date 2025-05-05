@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Drawing.Drawing2D;
 using PlatformerGame.Forms;
+using System.IO;
 
 namespace PlatformerGame.GameStates
 {
@@ -19,99 +21,115 @@ namespace PlatformerGame.GameStates
         public RulesState(MainForm form)
         {
             _form = form;
+            LoadRulesImage();
+        }
+
+        private void LoadRulesImage()
+        {
             try
             {
-                // Загружаем изображение правил
-                _rulesImage = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\rules.png");
+                // Путь к изображению в папке Resourses
+                string imagePath = Path.Combine(Application.StartupPath, "Resourses", "rules2.png");
+
+                if (File.Exists(imagePath))
+                {
+                    _rulesImage = new Bitmap(imagePath);
+                }
+                else
+                {
+                    throw new FileNotFoundException("Файл rules2.png не найден");
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                // Если изображение не загрузилось, можно добавить fallback
+                MessageBox.Show($"Ошибка загрузки изображения правил: {ex.Message}", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _rulesImage = null;
             }
-            UpdateButtonPosition();
-        }
-
-        private void UpdateButtonPosition()
-        {
-            int buttonWidth = 200;
-            _backButton = new Rectangle(
-                (_form.ClientSize.Width - buttonWidth) / 2,
-                _form.ClientSize.Height - 100,
-                buttonWidth,
-                50);
-        }
-
-        public void OnResize(EventArgs e)
-        {
-            UpdateButtonPosition();
-            _form.Invalidate();
         }
 
         public void Draw(Graphics g)
         {
-            // Полупрозрачный фон
-            g.FillRectangle(new SolidBrush(Color.FromArgb(220, 0, 0, 50)),
-                new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height));
+            // Заливка фона (на случай если изображение не загрузится)
+            g.Clear(Color.FromArgb(30, 30, 40));
 
-            // Объявляем переменные до блока if
-            int width = 0;
-            int height = 0;
-            bool imageLoaded = _rulesImage != null;
-
-            if (imageLoaded)
+            if (_rulesImage != null)
             {
-                // Рассчитываем пропорции
-                float imageAspect = (float)_rulesImage.Width / _rulesImage.Height;
-                float screenAspect = (float)_form.ClientSize.Width / _form.ClientSize.Height;
+                // Режим высококачественного масштабирования
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.HighQuality;
 
-                // Выбираем способ масштабирования
-                if (imageAspect > screenAspect)
+                // Рассчитываем размеры для сохранения пропорций
+                float imageRatio = (float)_rulesImage.Width / _rulesImage.Height;
+                float screenRatio = (float)_form.ClientSize.Width / _form.ClientSize.Height;
+
+                Rectangle destRect;
+
+                if (imageRatio > screenRatio)
                 {
-                    // Ширина ограничивающий фактор
-                    width = (int)(_form.ClientSize.Width * 0.9f);
-                    height = (int)(width / imageAspect);
+                    // Ширина изображения определяет масштаб
+                    int height = (int)(_form.ClientSize.Width / imageRatio);
+                    destRect = new Rectangle(
+                        0,
+                        (_form.ClientSize.Height - height) / 2,
+                        _form.ClientSize.Width,
+                        height);
                 }
                 else
                 {
-                    // Высота ограничивающий фактор
-                    height = (int)(_form.ClientSize.Height * 0.7f);
-                    width = (int)(height * imageAspect);
+                    // Высота изображения определяет масштаб
+                    int width = (int)(_form.ClientSize.Height * imageRatio);
+                    destRect = new Rectangle(
+                        (_form.ClientSize.Width - width) / 2,
+                        0,
+                        width,
+                        _form.ClientSize.Height);
                 }
 
-                // Позиционируем по центру
-                Rectangle imageRect = new Rectangle(
-                    (_form.ClientSize.Width - width) / 2,
-                    20, // Отступ сверху
-                    width,
-                    height);
-
-                // Рисуем сглаженное изображение
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                g.DrawImage(_rulesImage, imageRect);
+                // Рисуем изображение
+                g.DrawImage(_rulesImage, destRect);
             }
             else
             {
-                // Fallback текст
-                string errorText = "Изображение правил не загружено";
-                g.DrawString(errorText, new Font("Arial", 14), Brushes.White,
-                    new RectangleF(0, 50, _form.ClientSize.Width, 40), _centerFormat);
+                // Fallback текст если изображение не загрузилось
+                string errorText = "Изображение правил не загружено\n(rules2.png в папке Resourses)";
+                g.DrawString(errorText,
+                    new Font("Arial", 20, FontStyle.Bold),
+                    Brushes.White,
+                    new RectangleF(0, 0, _form.ClientSize.Width, _form.ClientSize.Height),
+                    _centerFormat);
             }
 
-            // Кнопка "Назад" (теперь переменные width и height доступны)
-            int buttonY = imageLoaded
-                ? Math.Min(_form.ClientSize.Height - 100, 20 + height + 40)
-                : _form.ClientSize.Height - 100;
+            // Рисуем кнопку "Назад"
+            DrawBackButton(g);
+        }
 
+        private void DrawBackButton(Graphics g)
+        {
             _backButton = new Rectangle(
                 (_form.ClientSize.Width - 200) / 2,
-                buttonY,
+                _form.ClientSize.Height - 80,
                 200,
                 50);
 
-            g.FillRectangle(Brushes.LightGray, _backButton);
-            g.DrawRectangle(Pens.DarkGray, _backButton);
-            g.DrawString("Назад (Esc)", new Font("Arial", 12), Brushes.Black, _backButton, _centerFormat);
+            // Стиль кнопки
+            using (var brush = new LinearGradientBrush(
+                _backButton,
+                Color.LightGray,
+                Color.DarkGray,
+                LinearGradientMode.Vertical))
+            {
+                g.FillRectangle(brush, _backButton);
+            }
+
+            g.DrawRectangle(Pens.Black, _backButton);
+
+            // Текст кнопки
+            g.DrawString("Назад (Esc)",
+                new Font("Arial", 12, FontStyle.Bold),
+                Brushes.Black,
+                _backButton,
+                _centerFormat);
         }
 
         public void HandleMouseClick(MouseEventArgs e)
@@ -134,14 +152,20 @@ namespace PlatformerGame.GameStates
 
         public void OnEnter()
         {
-            _form.Focus();
+            // При входе в состояние перезагружаем изображение
+            _rulesImage?.Dispose();
+            LoadRulesImage();
         }
 
         public void OnExit()
         {
             _rulesImage?.Dispose();
             _centerFormat.Dispose();
-            
+        }
+
+        public void OnResize(EventArgs e)
+        {
+            _form.Invalidate();
         }
     }
 }
