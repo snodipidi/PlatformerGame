@@ -32,10 +32,11 @@ namespace PlatformerGame.GameObjects
 
         public Player(Rectangle startPlatform)
         {
-            _standingSprite = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\player.png");
-            _walkingSprite = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\player_an.png");
+            _standingSprite = new Bitmap("Resourses\\player.png");
+            _walkingSprite = new Bitmap("Resourses\\player_an.png");
             Reset(startPlatform);
         }
+
 
         public void Reset(Rectangle startPlatform)
         {

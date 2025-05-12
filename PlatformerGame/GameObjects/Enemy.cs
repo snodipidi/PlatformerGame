@@ -18,7 +18,7 @@ namespace PlatformerGame.GameObjects
         {
             try
             {
-                _sprite = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\skeleton.png");
+                _sprite = new Bitmap("Resourses\\skeleton.png");
             }
             catch
             {

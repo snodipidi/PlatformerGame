@@ -49,7 +49,7 @@ namespace PlatformerGame.GameObjects
 
         public void Draw(Graphics g)
         {
-            // 1. Фоновая подсветка
+            // 1. овая подсветка
             using (var glowBrush = new SolidBrush(Color.FromArgb(50, 255, 100, 100)))
             {
                 g.FillRectangle(glowBrush,

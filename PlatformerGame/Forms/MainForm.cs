@@ -29,7 +29,7 @@ namespace PlatformerGame.Forms
 
             try
             {
-                _backgroundImage = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\back1.png");
+                _backgroundImage = new Bitmap("Resourses\\back1.png");
             }
             catch (Exception ex)
             {

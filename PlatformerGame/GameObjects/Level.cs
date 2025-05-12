@@ -45,8 +45,8 @@ namespace PlatformerGame.GameObjects
         {
             try
             {
-                _blockTexture = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\block.png");
-                _finishFlagTexture = new Bitmap("C:\\Users\\msmil\\source\\repos\\PlatformerGame\\PlatformerGame\\Resourses\\finish_flag.png");
+                _blockTexture = new Bitmap("Resourses\\block.png");
+                _finishFlagTexture = new Bitmap("Resourses\\finish_flag.png");
             }
             catch
             {
