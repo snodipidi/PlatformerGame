@@ -19,6 +19,7 @@ namespace PlatformerGame.Forms
         private Rectangle _previousBounds;
         private Bitmap _backgroundImage;
         private readonly LevelManager _levelManager = new LevelManager();
+        public IGameState CurrentState => _currentState;
 
         public MainForm()
         {
@@ -45,6 +46,7 @@ namespace PlatformerGame.Forms
                 this.Focus();
             };
         }
+
 
         private void StartLevel(LevelData levelData)
         {
@@ -98,6 +100,11 @@ namespace PlatformerGame.Forms
                 }
 
                 this.Invalidate();
+            }
+
+            if (_currentState is PauseState)
+            {
+                return;
             }
         }
 
@@ -153,10 +160,11 @@ namespace PlatformerGame.Forms
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.F11)
-                ToggleFullScreen();
-            else
-                _currentState?.HandleInput(e);
+            if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.P)
+            {
+                TogglePause();
+            }
+            else _currentState?.HandleInput(e);
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
@@ -198,5 +206,20 @@ namespace PlatformerGame.Forms
             }
             this.Invalidate();
         }
+        public void TogglePause()
+        {
+            if (_currentState is PauseState)
+            {
+                // Если уже на паузе - продолжаем
+                var pauseState = (PauseState)_currentState;
+                ChangeState(pauseState.PreviousState);
+            }
+            else if (_currentState is PlayingState)
+            {
+                // Если в игре - ставим на паузу
+                ChangeState(new PauseState(this, _currentState));
+            }
+        }
     }
+
 }

@@ -24,6 +24,16 @@ namespace PlatformerGame.GameStates
             _levelManager = levelManager;
         }
 
+        private void DrawHUD(Graphics g) // Добавляем метод DrawHUD
+        {
+            // Пример реализации HUD
+            using (var font = new Font("Arial", 16, FontStyle.Bold))
+            {
+                g.DrawString($"Уровень: {_levelManager.GetCurrentLevel().LevelNumber}",
+                    font, Brushes.White, 20, 20);
+            }
+        }
+
         public void Draw(Graphics g)
         {
             try
@@ -33,18 +43,19 @@ namespace PlatformerGame.GameStates
                 _player.Draw(g);
                 g.ResetTransform();
 
-                // Отображаем номер уровня с тенью
-                string levelText = $"Уровень: {_levelManager.GetCurrentLevel().LevelNumber}";
-                g.DrawString(levelText, _levelFont, Brushes.Black, 11, 11);
-                g.DrawString(levelText, _levelFont, Brushes.White, 10, 10);
-
-                // Отрисовка прогресс-бара (если нужен)
+                // Если игра на паузе - не рисуем HUD
+                if (!(_form.CurrentState is PauseState))
+                {
+                    // Отрисовка HUD (очки, время и т.д.)
+                    DrawHUD(g);
+                }
                 DrawProgressBar(g);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Ошибка отрисовки: {ex.Message}");
             }
+
         }
 
         private void DrawProgressBar(Graphics g)
@@ -72,19 +83,14 @@ namespace PlatformerGame.GameStates
                 barRect.Height);
 
             g.FillRectangle(Brushes.Green, filledRect);
-
-            // Текст прогресса
-            string progressText = $"{progress * 100:0}%";
-            var format = new StringFormat
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Center
-            };
-            g.DrawString(progressText, _progressFont, Brushes.Black, barRect, format);
         }
 
         public void HandleInput(KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.P)
+            {
+                return;
+            }
             switch (e.KeyCode)
             {
                 case Keys.Left:
