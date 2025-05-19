@@ -1,136 +1,292 @@
-﻿using PlatformerGame.Forms;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using PlatformerGame.Forms;
 
 namespace PlatformerGame.GameStates
 {
     public class MainMenuState : IGameState
     {
+        private class NeonButton
+        {
+            public Rectangle Bounds;
+            public string Text;
+            public Color BaseColor;
+            public Color GlowColor;
+            public float HoverProgress;
+            public bool IsHovered;
+        }
+
         private readonly MainForm _form;
-        private Rectangle _startButton;
-        private Rectangle _levelsButton;
-        private Rectangle _exitButton;
-        private readonly Font _titleFont;
-        private readonly Font _buttonFont;
-        private readonly StringFormat _textFormat;
-        private Rectangle _rulesButton;
+        private readonly List<NeonButton> _buttons = new List<NeonButton>();
+        private readonly Timer _animationTimer;
+        private readonly Random _random = new Random();
+        private Bitmap _background;
+        private float _globalTime;
+        private const int ButtonSpacing = 100;
 
         public MainMenuState(MainForm form)
         {
             _form = form;
-            _titleFont = new Font("Arial", 48, FontStyle.Bold);
-            _buttonFont = new Font("Arial", 16, FontStyle.Bold);
-            _textFormat = new StringFormat
+            InitializeBackground();
+            InitializeButtons();
+            _animationTimer = new Timer { Interval = 16 };
+            _animationTimer.Tick += (s, e) =>
             {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Center
+                _globalTime += 0.05f;
+                UpdateButtonStates();
+                _form.Invalidate();
+            };
+            _animationTimer.Start();
+        }
+
+        private void InitializeBackground()
+        {
+            _background?.Dispose();
+            _background = new Bitmap(_form.ClientSize.Width, _form.ClientSize.Height);
+            using (var g = Graphics.FromImage(_background))
+            {
+                var darkBlue = Color.FromArgb(15, 20, 40);
+                var purple = Color.FromArgb(60, 0, 80);
+
+                using (var brush = new LinearGradientBrush(
+                    new Point(0, 0),
+                    new Point(_form.ClientSize.Width, _form.ClientSize.Height),
+                    darkBlue,
+                    purple))
+                {
+                    g.FillRectangle(brush, new Rectangle(0, 0, _background.Width, _background.Height));
+                }
+            }
+        }
+
+        private void InitializeButtons()
+        {
+            _buttons.Clear();
+
+            var colors = new[]
+            {
+                Color.Cyan,
+                Color.Magenta,
+                Color.Yellow,
+                Color.OrangeRed
             };
 
-            UpdateButtonPositions();
-        }
-
-        private void Form_Resize(object sender, EventArgs e)
-        {
-            UpdateButtonPositions();
-            _form.Invalidate();
-        }
-
-        private void UpdateButtonPositions()
-        {
+            var buttonTitles = new[] { "НОВАЯ ИГРА", "УРОВНИ", "НАСТРОЙКИ", "ВЫХОД" };
             int centerX = _form.ClientSize.Width / 2;
-            int centerY = _form.ClientSize.Height / 2;
+            int startY = _form.ClientSize.Height / 3;
 
-            _startButton = new Rectangle(centerX - 100, centerY - 80, 200, 50);
-            _levelsButton = new Rectangle(centerX - 100, centerY - 20, 200, 50);
-            _rulesButton = new Rectangle(centerX - 100, centerY + 40, 200, 50);
-            _exitButton = new Rectangle(centerX - 100, centerY + 100, 200, 50);
+            for (int i = 0; i < buttonTitles.Length; i++)
+            {
+                _buttons.Add(new NeonButton
+                {
+                    Bounds = new Rectangle(centerX - 200, startY, 400, 80),
+                    Text = buttonTitles[i],
+                    BaseColor = colors[i],
+                    GlowColor = Color.FromArgb(100, colors[i]),
+                    HoverProgress = 0f
+                });
+                startY += ButtonSpacing;
+            }
         }
 
-        public void OnResize(EventArgs e)
+        private void UpdateButtonStates()
         {
-            UpdateButtonPositions();
-            _form.Invalidate();
+            foreach (var btn in _buttons)
+            {
+                btn.HoverProgress = Math.Max(0, Math.Min(1,
+                    btn.HoverProgress + (btn.IsHovered ? 0.15f : -0.1f)));
+            }
         }
 
         public void Draw(Graphics g)
         {
+            g.DrawImage(_background, 0, 0);
+            DrawDynamicEffects(g);
+
+            foreach (var btn in _buttons)
+            {
+                DrawNeonButton(g, btn);
+            }
+
+            DrawTitle(g);
+        }
+
+        private void DrawDynamicEffects(Graphics g)
+        {
+            using (var effectBrush = new SolidBrush(Color.FromArgb(30, 0, 200, 255)))
+            {
+                float size = 150 + (float)Math.Sin(_globalTime) * 50;
+                g.FillEllipse(effectBrush,
+                    _form.ClientSize.Width / 2 - size / 2,
+                    100 - size / 2,
+                    size, size);
+            }
+        }
+
+        private void DrawNeonButton(Graphics g, NeonButton btn)
+        {
+            float glow = btn.HoverProgress * 0.8f + 0.2f;
+            var bounds = btn.Bounds;
+
+            using (var path = GetRoundedPath(bounds, 20))
+            using (var glowBrush = new PathGradientBrush(path))
+            {
+                glowBrush.CenterColor = Color.FromArgb((int)(150 * glow), btn.BaseColor);
+                glowBrush.SurroundColors = new[] { Color.Transparent };
+                g.FillPath(glowBrush, path);
+            }
+
+            using (var path = GetRoundedPath(bounds, 20))
+            using (var brush = new SolidBrush(Color.FromArgb(100, btn.BaseColor)))
+            {
+                g.FillPath(brush, path);
+            }
+
+            using (var path = GetRoundedPath(bounds, 20))
+            using (var pen = new Pen(btn.BaseColor, 3 + 3 * glow))
+            {
+                g.DrawPath(pen, path);
+            }
+
+            using (var font = new Font("Arial Black", 24, FontStyle.Bold))
+            using (var format = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            })
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    using (var glowBrush = new SolidBrush(Color.FromArgb(30, btn.BaseColor)))
+                    {
+                        g.DrawString(btn.Text, font, glowBrush,
+                            bounds.X + _random.Next(-2, 2),
+                            bounds.Y + _random.Next(-2, 2),
+                            format);
+                    }
+                }
+
+                g.DrawString(btn.Text, font, Brushes.White, bounds, format);
+            }
+        }
+
+        private void DrawTitle(Graphics g)
+        {
+            using (var font = new Font("Impact", 72, FontStyle.Bold))
+            using (var brush = new LinearGradientBrush(
+                new Point(0, 0),
+                new Point(_form.ClientSize.Width, 0), 
+                Color.Cyan,
+                Color.Magenta))
             {
                 string title = "Platformer Game";
-                var titleSize = g.MeasureString(title, _titleFont);
-                g.DrawString(title, _titleFont, Brushes.White,
-                    (_form.ClientSize.Width - titleSize.Width) / 2,
-                    100);
+                var size = g.MeasureString(title, font);
+                var pos = new PointF(
+                    (_form.ClientSize.Width - size.Width) / 2,
+                    50);
 
-                DrawButton(g, _startButton, "Начать игру", Brushes.LightGreen, Pens.DarkGreen);
-                DrawButton(g, _levelsButton, "Уровни", Brushes.LightBlue, Pens.DarkBlue);
-                DrawButton(g, _rulesButton, "Правила", Brushes.LightGoldenrodYellow, Pens.DarkGoldenrod);
-                DrawButton(g, _exitButton, "Выход", Brushes.LightCoral, Pens.DarkRed);
+                for (int i = 0; i < 10; i++)
+                {
+                    g.DrawString(title, font, Brushes.Black,
+                        pos.X + (float)Math.Sin(_globalTime + i) * 3,
+                        pos.Y + (float)Math.Cos(_globalTime + i) * 3);
+                }
+
+                g.DrawString(title, font, brush, pos);
             }
         }
 
-        private void DrawButton(Graphics g, Rectangle rect, string text, Brush fill, Pen border)
-        {
-            g.FillRectangle(fill, rect);
-            g.DrawRectangle(border, rect);
-            g.DrawString(text, _buttonFont, Brushes.Black, rect, _textFormat);
-        }
 
-        public void HandleMouseClick(MouseEventArgs e)
+        private GraphicsPath GetRoundedPath(Rectangle bounds, int radius)
         {
-            if (_startButton.Contains(e.Location))
-            {
-                _form.StartNewGame();
-            }
-            else if (_levelsButton.Contains(e.Location))
-            {
-                _form.ShowLevelsMenu();
-            }
-            else if (_rulesButton.Contains(e.Location))
-            {
-                _form.ShowRules();
-            }
-            else if (_exitButton.Contains(e.Location))
-            {
-                _form.Close();
-            }
+            var path = new GraphicsPath();
+            path.AddArc(bounds.X, bounds.Y, radius, radius, 180, 90);
+            path.AddArc(bounds.X + bounds.Width - radius, bounds.Y, radius, radius, 270, 90);
+            path.AddArc(bounds.X + bounds.Width - radius, bounds.Y + bounds.Height - radius,
+                radius, radius, 0, 90);
+            path.AddArc(bounds.X, bounds.Y + bounds.Height - radius, radius, radius, 90, 90);
+            path.CloseFigure();
+            return path;
         }
 
         public void HandleInput(KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
-            {
                 _form.StartNewGame();
-            }
             else if (e.KeyCode == Keys.Escape)
-            {
                 _form.Close();
-            }
-            else if (e.KeyCode == Keys.L)
+        }
+
+        private void HandleMouseClick(object sender, MouseEventArgs e)
+        {
+            HandleMouseClick(e); // вызывает реализацию интерфейса
+        }
+
+        public void HandleMouseClick(MouseEventArgs e)
+        {
+            foreach (var btn in _buttons)
             {
-                _form.ShowLevelsMenu();
-            }
-            else if (e.KeyCode == Keys.H) // H - help (правила)
-            {
-                _form.ShowRules();
+                if (btn.Bounds.Contains(e.Location))
+                {
+                    HandleAction(btn.Text);
+                    break;
+                }
             }
         }
 
-        public void Update() { }
+
+
+
+        private void HandleAction(string buttonText)
+        {
+            switch (buttonText)
+            {
+                case "НОВАЯ ИГРА":
+                    _form.StartNewGame();
+                    break;
+                case "УРОВНИ":
+                    _form.ShowLevelsMenu();
+                    break;
+                case "ВЫХОД":
+                    _form.Close();
+                    break;
+                case "НАСТРОЙКИ":
+                    MessageBox.Show("Настройки пока не реализованы", "Инфо");
+                    break;
+            }
+        }
 
         public void OnEnter()
         {
-            UpdateButtonPositions();
+            _form.MouseMove += HandleMouseMove;
+            _form.MouseClick += HandleMouseClick;
         }
 
         public void OnExit()
         {
-            // Отписываемся от события при выходе из состояния
-            _form.Resize -= Form_Resize;
+            _animationTimer.Stop();
+            _form.MouseMove -= HandleMouseMove;
+            _form.MouseClick -= HandleMouseClick;
+            _background?.Dispose();
+        }
 
-            _titleFont.Dispose();
-            _buttonFont.Dispose();
-            _textFormat.Dispose();
+        public void OnResize(EventArgs e)
+        {
+            InitializeBackground();
+            InitializeButtons();
+        }
+
+        public void Update() { }
+
+        private void HandleMouseMove(object sender, MouseEventArgs e)
+        {
+            foreach (var btn in _buttons)
+            {
+                btn.IsHovered = btn.Bounds.Contains(e.Location);
+            }
         }
     }
 }
