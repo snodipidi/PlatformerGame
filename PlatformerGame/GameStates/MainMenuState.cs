@@ -169,7 +169,7 @@ namespace PlatformerGame.GameStates
             using (var font = new Font("Impact", 72, FontStyle.Bold))
             using (var brush = new LinearGradientBrush(
                 new Point(0, 0),
-                new Point(_form.ClientSize.Width, 0), 
+                new Point(_form.ClientSize.Width, 0),
                 Color.Cyan,
                 Color.Magenta))
             {
@@ -245,10 +245,11 @@ namespace PlatformerGame.GameStates
                     _form.Close();
                     break;
                 case "НАСТРОЙКИ":
-                    MessageBox.Show("Настройки пока не реализованы", "Инфо");
+                    _form.ShowSettings();
                     break;
             }
         }
+
 
         public void OnEnter()
         {

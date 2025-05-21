@@ -10,6 +10,9 @@ namespace PlatformerGame
         private static SoundPlayer _gameoverSound;
         private static SoundPlayer _winSound;
 
+        // Флаг включения звука (по умолчанию включён)
+        public static bool IsSoundEnabled { get; set; } = true;
+
         public static void Initialize()
         {
             string soundsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Sounds");
@@ -39,15 +42,15 @@ namespace PlatformerGame
             }
         }
 
-        // Для поражения (Game Over)
         public static void PlayGameOverSound()
         {
+            if (!IsSoundEnabled) return;
             _gameoverSound?.Play();
         }
 
-        // Для победы (Level Complete)
         public static void PlayWinSound()
         {
+            if (!IsSoundEnabled) return;
             _winSound?.Play();
         }
     }

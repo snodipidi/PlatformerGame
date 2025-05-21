@@ -50,6 +50,7 @@
     <Compile Include="GameObjects\Enemy.cs" />
     <Compile Include="GameObjects\LevelManager.cs" />
     <Compile Include="GameObjects\LevelData.cs" />
+    <Compile Include="GameStates\SettingsState.cs" />
     <Compile Include="GameStates\PauseState.cs" />
     <Compile Include="GameStates\RulesState.cs" />
     <Compile Include="GameStates\LevelCompleteState.cs" />

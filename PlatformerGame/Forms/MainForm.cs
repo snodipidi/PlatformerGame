@@ -220,6 +220,12 @@ namespace PlatformerGame.Forms
                 ChangeState(new PauseState(this, _currentState));
             }
         }
+        public void ShowSettings()
+        {
+            _gameTimer?.Stop();   // Остановим игру, если была запущена
+            ChangeState(new SettingsState(this));
+        }
+
     }
 
 }

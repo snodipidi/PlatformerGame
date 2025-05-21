@@ -1,0 +1,178 @@
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+using PlatformerGame.Forms;
+
+namespace PlatformerGame.GameStates
+{
+    public class SettingsState : IGameState
+    {
+        private readonly MainForm _form;
+        private Button _backButton;
+        private Rectangle _toggleRect;       // Область переключателя
+        private bool _soundEnabled;
+
+        private readonly int ToggleWidth = 80;
+        private readonly int ToggleHeight = 40;
+        private readonly int ToggleMargin = 8;
+
+        public SettingsState(MainForm form)
+        {
+            _form = form;
+            _soundEnabled = SoundManager.IsSoundEnabled;
+            InitializeControls();
+        }
+
+        private void InitializeControls()
+        {
+            // Кнопка "Назад"
+            _backButton = new Button
+            {
+                Text = "← Назад",
+                Font = new Font("Segoe UI", 18, FontStyle.Regular),
+                ForeColor = Color.White,
+                BackColor = Color.FromArgb(30, 30, 60),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(140, 50),
+                Location = new Point(20, 20),
+                Cursor = Cursors.Hand
+            };
+            _backButton.FlatAppearance.BorderSize = 0;
+            _backButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 50, 90);
+            _backButton.Click += (s, e) =>
+            {
+                _form.ShowMainMenu();
+            };
+
+            // Расположение переключателя
+            UpdateToggleRect();
+        }
+
+        private void UpdateToggleRect()
+        {
+            int x = _form.ClientSize.Width / 2 + 80;
+            int y = _form.ClientSize.Height / 2 - ToggleHeight / 2;
+            _toggleRect = new Rectangle(x, y, ToggleWidth, ToggleHeight);
+        }
+
+        public void Draw(Graphics g)
+        {
+            // Фон с градиентом
+            using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(
+                new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height),
+                Color.FromArgb(10, 20, 50),
+                Color.FromArgb(40, 60, 100),
+                90f))
+            {
+                g.FillRectangle(brush, 0, 0, _form.ClientSize.Width, _form.ClientSize.Height);
+            }
+
+            // Заголовок
+            using (var font = new Font("Segoe UI", 48, FontStyle.Bold))
+            using (var brush = new SolidBrush(Color.Cyan))
+            {
+                string title = "Настройки";
+                var size = g.MeasureString(title, font);
+                g.DrawString(title, font, brush, (_form.ClientSize.Width - size.Width) / 2, 60);
+            }
+
+            // Надпись "Звук"
+            using (var font = new Font("Segoe UI", 32, FontStyle.Bold))
+            using (var brush = new SolidBrush(Color.LightCyan))
+            {
+                string soundLabel = "Звук";
+                var size = g.MeasureString(soundLabel, font);
+                int x = _form.ClientSize.Width / 2 - 200;
+                int y = _form.ClientSize.Height / 2 - (int)size.Height / 2;
+                g.DrawString(soundLabel, font, brush, x, y);
+            }
+
+            // Рисуем переключатель toggle switch
+            DrawToggleSwitch(g, _toggleRect, _soundEnabled);
+        }
+
+        private void DrawToggleSwitch(Graphics g, Rectangle rect, bool isOn)
+        {
+            // Цвета
+            Color backColor = isOn ? Color.FromArgb(100, 220, 100) : Color.FromArgb(150, 150, 150);
+            Color toggleColor = Color.White;
+            int radius = rect.Height / 2;
+
+            // Рисуем фон переключателя (скруглённый прямоугольник)
+            using (var path = RoundedRect(rect, radius))
+            using (var backBrush = new SolidBrush(backColor))
+            {
+                g.FillPath(backBrush, path);
+            }
+
+            // Позиция круга внутри переключателя
+            int circleDiameter = rect.Height - ToggleMargin * 2;
+            int circleX = isOn ? rect.Right - circleDiameter - ToggleMargin : rect.Left + ToggleMargin;
+            int circleY = rect.Top + ToggleMargin;
+
+            // Рисуем круг (ползунок)
+            using (var toggleBrush = new SolidBrush(toggleColor))
+            {
+                g.FillEllipse(toggleBrush, circleX, circleY, circleDiameter, circleDiameter);
+            }
+        }
+
+        // Метод для рисования скругленного прямоугольника
+        private System.Drawing.Drawing2D.GraphicsPath RoundedRect(Rectangle bounds, int radius)
+        {
+            int diameter = radius * 2;
+            var path = new System.Drawing.Drawing2D.GraphicsPath();
+
+            path.AddArc(bounds.Left, bounds.Top, diameter, diameter, 180, 90);
+            path.AddArc(bounds.Right - diameter, bounds.Top, diameter, diameter, 270, 90);
+            path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
+            path.AddArc(bounds.Left, bounds.Bottom - diameter, diameter, diameter, 90, 90);
+            path.CloseFigure();
+
+            return path;
+        }
+
+        public void HandleInput(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                _form.ShowMainMenu();
+            }
+        }
+
+        public void HandleMouseClick(MouseEventArgs e)
+        {
+            // Проверяем клик внутри переключателя
+            if (_toggleRect.Contains(e.Location))
+            {
+                _soundEnabled = !_soundEnabled;
+                SoundManager.IsSoundEnabled = _soundEnabled;
+                _form.Invalidate();
+            }
+        }
+
+        public void OnEnter()
+        {
+            _form.Controls.Add(_backButton);
+            _backButton.BringToFront();
+        }
+
+        public void OnExit()
+        {
+            _form.Controls.Remove(_backButton);
+            _backButton.Dispose();
+        }
+
+        public void OnResize(EventArgs e)
+        {
+            _backButton.Location = new Point(20, 20);
+            UpdateToggleRect();
+            _form.Invalidate();
+        }
+
+        public void Update()
+        {
+            // Нет нужды
+        }
+    }
+}
