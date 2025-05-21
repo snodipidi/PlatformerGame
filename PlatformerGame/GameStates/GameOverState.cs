@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using PlatformerGame.Forms;
 
@@ -9,70 +10,65 @@ namespace PlatformerGame.GameStates
     {
         private readonly MainForm _form;
         private Rectangle _retryButton;
-        private Rectangle _menuButton; // Новая кнопка для выхода в меню
-        private readonly Font _titleFont = new Font("Arial", 32, FontStyle.Bold);
-        private readonly Font _buttonFont = new Font("Arial", 12, FontStyle.Bold);
-
-        private void UpdateButtonPosition()
-        {
-            int centerX = _form.ClientSize.Width / 2;
-            int centerY = _form.ClientSize.Height / 2;
-
-            _retryButton = new Rectangle(
-                centerX - 100,
-                centerY + 10,
-                200,
-                50
-            );
-
-            // Позиционируем кнопку меню под кнопкой рестарта
-            _menuButton = new Rectangle(
-                centerX - 100,
-                centerY + 70, // Отступ 20 пикселей от предыдущей кнопки
-                200,
-                50
-            );
-        }
-
-        public void OnResize(EventArgs e)
-        {
-            UpdateButtonPosition();
-            _form.Invalidate();
-        }
+        private Rectangle _menuButton;
+        private readonly Font _titleFont = new Font("Arial", 36, FontStyle.Bold);
+        private readonly Font _buttonFont = new Font("Arial", 14, FontStyle.Bold);
+        private Point _mousePosition;
 
         public GameOverState(MainForm form)
         {
             _form = form;
-            InitializeUI();
+            _form.MouseMove += (s, e) => { _mousePosition = e.Location; _form.Invalidate(); };
+            UpdateButtonPositions();
         }
 
-        private void InitializeUI()
+        private void UpdateButtonPositions()
         {
-            UpdateButtonPosition();
+            int centerX = _form.ClientSize.Width / 2;
+            int centerY = _form.ClientSize.Height / 2;
+
+            _retryButton = new Rectangle(centerX - 120, centerY - 40, 240, 60);
+            _menuButton = new Rectangle(centerX - 120, centerY + 40, 240, 60);
         }
 
-        public void Update() { }
+        public void OnResize(EventArgs e)
+        {
+            UpdateButtonPositions();
+            _form.Invalidate();
+        }
 
         public void Draw(Graphics g)
         {
-            // Полупрозрачный черный фон
-            g.FillRectangle(new SolidBrush(Color.FromArgb(180, 0, 0, 0)),
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            g.FillRectangle(new SolidBrush(Color.FromArgb(220, 80, 0, 0)),
                 new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height));
 
-            // Текст "Вы проиграли!"
-            string text = "Вы проиграли!";
-            var textSize = g.MeasureString(text, _titleFont);
-            g.DrawString(text, _titleFont, Brushes.Red,
-                (_form.ClientSize.Width - textSize.Width) / 2,
-                _form.ClientSize.Height / 2 - 60);
+            string title = "ВЫ ПРОИГРАЛИ!";
+            var titleSize = g.MeasureString(title, _titleFont);
+            float titleX = (_form.ClientSize.Width - titleSize.Width) / 2;
+            float titleY = (_form.ClientSize.Height - titleSize.Height) / 2 - 120;
 
-            // Кнопка "Начать заново"
-            g.FillRectangle(Brushes.LightGray, _retryButton);
-            g.DrawRectangle(Pens.DarkGray, _retryButton);
+            g.DrawString(title, _titleFont, Brushes.Black, titleX + 2, titleY + 2);
+            g.DrawString(title, _titleFont, Brushes.Red, titleX, titleY);
 
-            // Кнопка "В меню"
-            g.FillRectangle(Brushes.LightGray, _menuButton);
-            g.DrawRectangle(Pens.DarkGray, _menuButton);
+            DrawButton(g, _retryButton, "Начать заново (R)",
+                _retryButton.Contains(_mousePosition) ? Brushes.MediumSeaGreen : Brushes.LightGreen,
+                Pens.DarkGreen);
+
+            DrawButton(g, _menuButton, "В меню (M)",
+                _menuButton.Contains(_mousePosition) ? Brushes.IndianRed : Brushes.MistyRose,
+                Pens.Maroon);
+        }
+
+        private void DrawButton(Graphics g, Rectangle rect, string text, Brush fill, Pen border)
+        {
+            int radius = 20;
+            using (GraphicsPath path = RoundedRect(rect, radius))
+            {
+                g.FillPath(fill, path);
+                g.DrawPath(border, path);
+            }
 
             var format = new StringFormat
             {
@@ -80,8 +76,21 @@ namespace PlatformerGame.GameStates
                 LineAlignment = StringAlignment.Center
             };
 
-            g.DrawString("Начать заново (R)", _buttonFont, Brushes.Black, _retryButton, format);
-            g.DrawString("В меню (M)", _buttonFont, Brushes.Black, _menuButton, format);
+            g.DrawString(text, _buttonFont, Brushes.Black, rect, format);
+        }
+
+        private GraphicsPath RoundedRect(Rectangle bounds, int radius)
+        {
+            int diameter = radius * 2;
+            var path = new GraphicsPath();
+
+            path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
+            path.AddArc(bounds.Right - diameter, bounds.Y, diameter, diameter, 270, 90);
+            path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
+            path.AddArc(bounds.X, bounds.Bottom - diameter, diameter, diameter, 90, 90);
+            path.CloseFigure();
+
+            return path;
         }
 
         public void HandleInput(KeyEventArgs e)
@@ -108,11 +117,17 @@ namespace PlatformerGame.GameStates
             }
         }
 
+        public void Update() { }
+
         public void OnEnter()
         {
             SoundManager.PlayGameOverSound();
-
         }
-        public void OnExit() { }
+
+        public void OnExit()
+        {
+            _titleFont.Dispose();
+            _buttonFont.Dispose();
+        }
     }
 }
