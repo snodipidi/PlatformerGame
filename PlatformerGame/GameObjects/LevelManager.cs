@@ -79,6 +79,16 @@ namespace PlatformerGame.GameObjects
                 Difficulty = 7,
                 Description = "Уровень с движущимися колоннами"
             });
+
+            _levels.Add(new LevelData
+            {
+                LevelNumber = 5,
+                IsLocked = true,
+                Length = 6000,
+                PlatformCount = 0,
+                Difficulty = 9,
+                Description = "Смертельный микс с движущимися платформами"
+            });
         }
 
         public LevelData GetCurrentLevel() => _levels[_currentLevelIndex];

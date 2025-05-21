@@ -51,7 +51,7 @@ namespace PlatformerGame.Forms
         private void StartLevel(LevelData levelData)
         {
             _level = new Level(ClientSize, levelData);
-            _player = new Player(_level.StartPlatform);
+            _player = new Player(_level.StartPlatform, _level); 
 
             _gameTimer = new GameTimer(16);
             _gameTimer.Update += GameLoop;
@@ -77,7 +77,7 @@ namespace PlatformerGame.Forms
         {
             if (_currentState is PlayingState)
             {
-                _player.Update(_level.Platforms);
+                _player.Update();
                 _level.Update(_player.Position.X);
 
                 // Проверка всех опасных столкновений

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace PlatformerGame.GameObjects
@@ -17,7 +18,8 @@ namespace PlatformerGame.GameObjects
         private Bitmap _walkingSprite;
         private bool _showWalkingSprite = false;
         private int _animationCounter = 0;
-        private const int AnimationDelay = 10; // Скорость переключения
+        private const int AnimationDelay = 10;
+        private Level _level;
 
 
         // Физика (без изменений)
@@ -30,10 +32,18 @@ namespace PlatformerGame.GameObjects
         private const float JumpForce = 12f;
         public float GetProgressX() => Position.X;
 
-        public Player(Rectangle startPlatform)
+        public Player(Rectangle startPlatform, Level level)
         {
-            _standingSprite = new Bitmap("Resourses\\player.png");
-            _walkingSprite = new Bitmap("Resourses\\player_an.png");
+            _level = level; // Инициализация уровня
+            try
+            {
+                _standingSprite = new Bitmap("Resourses\\player.png");
+                _walkingSprite = new Bitmap("Resourses\\player_an.png");
+            }
+            catch
+            {
+                // Обработка ошибок загрузки спрайтов
+            }
             Reset(startPlatform);
         }
 
@@ -48,9 +58,11 @@ namespace PlatformerGame.GameObjects
             _animationCounter = 0;
         }
 
-        public void Update(List<Rectangle> platforms)
+        public void Update()
         {
-            // Физика (без изменений)
+            var allPlatforms = new List<Rectangle>(_level.Platforms);
+            allPlatforms.AddRange(_level.MovingPlatforms.Select(mp => mp.Bounds));
+
             Position = new PointF(
                 Position.X + (IsMovingLeft ? -Speed : IsMovingRight ? Speed : 0),
                 Position.Y + _verticalVelocity);
@@ -63,7 +75,7 @@ namespace PlatformerGame.GameObjects
                 Width - 10,
                 1);
 
-            foreach (var platform in platforms)
+            foreach (var platform in allPlatforms)
             {
                 if (feet.IntersectsWith(platform) && _verticalVelocity > 0)
                 {
@@ -73,19 +85,18 @@ namespace PlatformerGame.GameObjects
                 }
             }
 
-            // Простейшая анимация ходьбы
             if (IsMovingLeft || IsMovingRight)
             {
                 _animationCounter++;
                 if (_animationCounter >= AnimationDelay)
                 {
                     _animationCounter = 0;
-                    _showWalkingSprite = !_showWalkingSprite; // Переключаем спрайт
+                    _showWalkingSprite = !_showWalkingSprite;
                 }
             }
             else
             {
-                _showWalkingSprite = false; // Стоим - показываем статичный спрайт
+                _showWalkingSprite = false;
             }
         }
 

@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameObjects\MovingPlatform.cs" />
     <Compile Include="GameObjects\ColumnEnemy.cs" />
     <Compile Include="GameObjects\Enemy.cs" />
     <Compile Include="GameObjects\LevelManager.cs" />

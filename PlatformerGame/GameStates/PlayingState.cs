@@ -90,7 +90,7 @@ namespace PlatformerGame.GameStates
 
         private void UpdateGameLogic()
         {
-            _player.Update(_level.Platforms);
+            _player.Update(); 
             _level.Update(_player.Position.X);
 
             if (_level.CheckPlayerCollision(_player) || _player.HasFallen(_form.ClientSize.Height))
