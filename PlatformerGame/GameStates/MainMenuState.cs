@@ -158,20 +158,11 @@ namespace PlatformerGame.GameStates
                 LineAlignment = StringAlignment.Center
             })
             {
-                for (int i = 0; i < 5; i++)
-                {
-                    using (var glowBrush = new SolidBrush(Color.FromArgb(30, btn.BaseColor)))
-                    {
-                        g.DrawString(btn.Text, font, glowBrush,
-                            bounds.X + _random.Next(-2, 2),
-                            bounds.Y + _random.Next(-2, 2),
-                            format);
-                    }
-                }
-
+                // Отображаем только 1 раз текст без дополнительного "шума"
                 g.DrawString(btn.Text, font, Brushes.White, bounds, format);
             }
         }
+
 
         private void DrawTitle(Graphics g)
         {
