@@ -8,16 +8,14 @@ namespace PlatformerGame.GameStates
     public class PauseState : IGameState
     {
         private readonly MainForm _form;
-        private readonly IGameState _previousState;
+        public IGameState PreviousState { get; }
         private Rectangle _resumeButton;
         private Rectangle _menuButton;
 
-        public IGameState PreviousState => _previousState; // Добавляем свойство
-
         public PauseState(MainForm form, IGameState previousState)
         {
-            _form = form;
-            _previousState = previousState;
+            _form = form ?? throw new ArgumentNullException(nameof(form));
+            PreviousState = previousState ?? throw new ArgumentNullException(nameof(previousState));
             CalculateButtonPositions();
         }
 
@@ -32,19 +30,16 @@ namespace PlatformerGame.GameStates
 
         public void Draw(Graphics g)
         {
-            // Затемняем игровой мир
-            _previousState.Draw(g);
+            PreviousState.Draw(g);
             g.FillRectangle(new SolidBrush(Color.FromArgb(180, 0, 0, 0)),
                 new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height));
 
-            // Рисуем меню паузы
             using (var font = new Font("Arial", 32, FontStyle.Bold))
             {
                 g.DrawString("ПАУЗА", font, Brushes.White,
                     _form.ClientSize.Width / 2 - 70, _form.ClientSize.Height / 3);
             }
 
-            // Кнопки
             DrawButton(g, _resumeButton, "Продолжить");
             DrawButton(g, _menuButton, "В меню");
         }
@@ -68,9 +63,9 @@ namespace PlatformerGame.GameStates
 
         public void HandleInput(KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.P)
+            if (e.KeyCode == Keys.Escape)
             {
-                _form.ChangeState(_previousState);
+                _form.TogglePause();
             }
         }
 
@@ -78,7 +73,7 @@ namespace PlatformerGame.GameStates
         {
             if (_resumeButton.Contains(e.Location))
             {
-                _form.ChangeState(_previousState);
+                _form.TogglePause();
             }
             else if (_menuButton.Contains(e.Location))
             {

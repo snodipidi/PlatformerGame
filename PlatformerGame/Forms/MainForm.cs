@@ -14,12 +14,8 @@ namespace PlatformerGame.Forms
         private Player _player;
         private Level _level;
         private GameTimer _gameTimer;
-        private bool _isFullScreen = false;
-        private FormWindowState _previousWindowState;
-        private Rectangle _previousBounds;
         private Bitmap _backgroundImage;
         private readonly LevelManager _levelManager = new LevelManager();
-        public IGameState CurrentState => _currentState;
 
         public MainForm()
         {
@@ -38,8 +34,6 @@ namespace PlatformerGame.Forms
                 _backgroundImage = null;
             }
 
-            this.DoubleBuffered = true;
-
             this.Load += (sender, e) =>
             {
                 ShowMainMenu();
@@ -47,11 +41,10 @@ namespace PlatformerGame.Forms
             };
         }
 
-
         private void StartLevel(LevelData levelData)
         {
             _level = new Level(ClientSize, levelData);
-            _player = new Player(_level.StartPlatform, _level); 
+            _player = new Player(_level.StartPlatform, _level);
 
             _gameTimer = new GameTimer(16);
             _gameTimer.Update += GameLoop;
@@ -69,7 +62,6 @@ namespace PlatformerGame.Forms
         public void StartNewGame()
         {
             var currentLevel = _levelManager.GetCurrentLevel();
-            Debug.WriteLine($"Запуск уровня {currentLevel.LevelNumber}"); // Для отладки
             StartLevel(currentLevel);
         }
 
@@ -80,7 +72,6 @@ namespace PlatformerGame.Forms
                 _player.Update();
                 _level.Update(_player.Position.X);
 
-                // Проверка всех опасных столкновений
                 if (_level.CheckPlayerCollision(_player) || _player.HasFallen(ClientSize.Height))
                 {
                     GameOver();
@@ -93,18 +84,7 @@ namespace PlatformerGame.Forms
                     return;
                 }
 
-                if (_level.CheckPlayerCollision(_player) || _player.HasFallen(ClientSize.Height))
-                {
-                    GameOver();
-                    return;
-                }
-
                 this.Invalidate();
-            }
-
-            if (_currentState is PauseState)
-            {
-                return;
             }
         }
 
@@ -150,21 +130,29 @@ namespace PlatformerGame.Forms
                 e.Graphics.Clear(Color.SkyBlue);
             }
 
-            if (_currentState != null)
-            {
-                _currentState.Draw(e.Graphics);
-            }
-
+            _currentState?.Draw(e.Graphics);
             base.OnPaint(e);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.P)
+            if (e.KeyCode == Keys.Escape)
             {
-                TogglePause();
+                if (_currentState is PlayingState playingState)
+                {
+                    TogglePause();
+                    e.Handled = true;
+                }
+                else if (_currentState is PauseState)
+                {
+                    TogglePause();
+                    e.Handled = true;
+                }
             }
-            else _currentState?.HandleInput(e);
+            else
+            {
+                _currentState?.HandleInput(e);
+            }
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
@@ -188,44 +176,24 @@ namespace PlatformerGame.Forms
             this.Invalidate();
         }
 
-        private void ToggleFullScreen()
-        {
-            _isFullScreen = !_isFullScreen;
-            if (_isFullScreen)
-            {
-                _previousWindowState = this.WindowState;
-                _previousBounds = this.Bounds;
-                this.FormBorderStyle = FormBorderStyle.None;
-                this.WindowState = FormWindowState.Maximized;
-            }
-            else
-            {
-                this.FormBorderStyle = FormBorderStyle.Sizable;
-                this.WindowState = _previousWindowState;
-                this.Bounds = _previousBounds;
-            }
-            this.Invalidate();
-        }
         public void TogglePause()
         {
-            if (_currentState is PauseState)
+            if (_currentState is PauseState pauseState)
             {
-                // Если уже на паузе - продолжаем
-                var pauseState = (PauseState)_currentState;
                 ChangeState(pauseState.PreviousState);
+                _gameTimer.Start();
             }
             else if (_currentState is PlayingState)
             {
-                // Если в игре - ставим на паузу
+                _gameTimer.Stop();
                 ChangeState(new PauseState(this, _currentState));
             }
         }
+
         public void ShowSettings()
         {
-            _gameTimer?.Stop();   // Остановим игру, если была запущена
+            _gameTimer?.Stop();
             ChangeState(new SettingsState(this));
         }
-
     }
-
 }

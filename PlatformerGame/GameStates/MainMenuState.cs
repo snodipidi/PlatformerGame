@@ -208,7 +208,7 @@ namespace PlatformerGame.GameStates
             if (e.KeyCode == Keys.Enter)
                 _form.StartNewGame();
             else if (e.KeyCode == Keys.Escape)
-                _form.Close();
+                _form.Close(); // Оставляем закрытие по ESC только в главном меню
         }
 
         private void HandleMouseClick(object sender, MouseEventArgs e)
