@@ -206,5 +206,27 @@ namespace PlatformerGame.Forms
             _gameTimer?.Stop();
             ChangeState(new SettingsState(this));
         }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            if (_currentState is PauseState pause)
+                pause.OnMouseMove(e);
+            base.OnMouseMove(e);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            if (_currentState is PauseState pause)
+                pause.OnMouseDown(e);
+            base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            if (_currentState is PauseState pause)
+                pause.OnMouseUp(e);
+            base.OnMouseUp(e);
+        }
+
     }
 }
