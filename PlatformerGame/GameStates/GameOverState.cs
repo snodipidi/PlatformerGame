@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Media;
 using System.Windows.Forms;
 using PlatformerGame.Forms;
 
@@ -119,9 +120,14 @@ namespace PlatformerGame.GameStates
 
         public void Update() { }
 
+        private bool _soundPlayed = false;
         public void OnEnter()
         {
-            SoundManager.PlayGameOverSound();
+            if (!_soundPlayed)
+            {
+                SoundManager.PlayGameOverSound();
+                _soundPlayed = true;
+            }
         }
 
         public void OnExit()

@@ -43,6 +43,7 @@ namespace PlatformerGame.Forms
 
         private void StartLevel(LevelData levelData)
         {
+            _gameTimer?.Stop();
             _level = new Level(ClientSize, levelData);
             _player = new Player(_level.StartPlatform, _level);
 
@@ -90,15 +91,25 @@ namespace PlatformerGame.Forms
 
         public void CompleteLevel()
         {
+            _gameTimer?.Stop();
+            if (_currentState is PlayingState playingState)
+            {
+                playingState.StopGameTimer();
+            }
+
             _levelManager.UnlockNextLevel();
             ChangeState(new LevelCompletedState(this, _levelManager));
-            _gameTimer?.Stop();
         }
 
         public void GameOver()
         {
-            ChangeState(new GameOverState(this));
             _gameTimer?.Stop();
+            if (_currentState is PlayingState playingState)
+            {
+                playingState.StopGameTimer();
+            }
+
+            ChangeState(new GameOverState(this));
         }
 
         public void ShowLevelsMenu()

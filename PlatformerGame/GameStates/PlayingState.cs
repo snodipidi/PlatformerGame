@@ -96,10 +96,12 @@ namespace PlatformerGame.GameStates
 
         private void GameLoop()
         {
-            if (_isPaused) return;
+            if (_isPaused || _gameTimer == null) return;
 
             try
             {
+                if (_player == null || _level == null) return;
+
                 _player.Update();
                 _level.Update(_player.Position.X);
 
@@ -421,6 +423,11 @@ namespace PlatformerGame.GameStates
             }
         }
 
+        public void StopGameTimer()
+        {
+            _gameTimer?.Stop();
+        }
+
         public void OnEnter()
         {
             _form.MouseMove += HandleMouseMove;
@@ -429,6 +436,7 @@ namespace PlatformerGame.GameStates
 
         public void OnExit()
         {
+            StopGameTimer(); // Останавливаем таймер при выходе
             DisposeResources();
             _form.MouseMove -= HandleMouseMove;
             _form.MouseClick -= HandleMouseClickWrapper;
