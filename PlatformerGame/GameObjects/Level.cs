@@ -243,71 +243,51 @@ namespace PlatformerGame.GameObjects
             {
                 int groundY = screenSize.Height - 100;
                 int platformHeight = 20;
+                int trapHeight = 25; // Высота ловушек-шипов
 
-                // 1. Стартовые платформы
+                // 1. Стартовые платформы (как в оригинале)
                 Platforms.Add(new Rectangle(0, groundY, 300, platformHeight));
                 Platforms.Add(new Rectangle(400, groundY - 100, 180, platformHeight));
 
-                // 2. Движущиеся платформы
+                // 2. Движущиеся платформы (оригинальные параметры)
                 MovingPlatforms.Add(new MovingPlatform(
-                    600, groundY - 150,  // X, Y
-                    120, platformHeight,  // Width, Height
-                    200, 3, true));       // MoveRange, Speed, Vertical
+                    600, groundY - 150,
+                    120, platformHeight,
+                    200, 3, true)); // Вертикальная
 
                 MovingPlatforms.Add(new MovingPlatform(
                     900, groundY - 100,
                     150, platformHeight,
-                    300, 4, false));     // Horizontal
+                    300, 4, false)); // Горизонтальная
 
-                // 3. Центральный блок без шипов
+                // 3. Центральный блок
                 Platforms.Add(new Rectangle(1200, groundY - 80, 200, platformHeight));
 
-                // 4. Враги
+                // 4. Враг (оригинальные параметры)
                 Enemies.Add(new Enemy(
-                    1350,                 // X
-                    groundY - 80,         // PlatformY
-                    150,                  // MoveRange
-                    3));                  // Speed
+                    1350, groundY - 80,
+                    150, 3));
 
-                // 5. Колонна с платформой
+                // 5. Колонна (слегка уменьшенная)
                 int columnX = 1600;
-                int columnPlatformY = groundY - 180;
-
-                // Платформа под колонной
-                Platforms.Add(new Rectangle(
-                    columnX - 40,          // X
-                    columnPlatformY + 150, // Y (под колонной)
-                    100,                   // Width
-                    platformHeight));
-
-                // Сама колонна
+                Platforms.Add(new Rectangle(columnX - 40, groundY - 20, 100, platformHeight));
                 ColumnEnemies.Add(new ColumnEnemy(
-                    columnX,               // X
-                    columnPlatformY,       // Y
-                    30,                    // Width
-                    150,                   // Height
-                    120,                   // MoveRange
-                    2));                   // Speed
+                    columnX, groundY - 180,
+                    30, 150, 120, 2));
 
-                // 6. Сложные движущиеся платформы
-                MovingPlatforms.Add(new MovingPlatform(
-                    2000, groundY - 200,
-                    100, platformHeight,
-                    150, 5, true));       // Vertical, быстрая
+                // 6. ★ Новая ловушка после колонны ★
+                Platforms.Add(new Rectangle(columnX + 250, groundY - 120, 200, platformHeight));
+                Traps.Add(new Rectangle(
+                    columnX + 250 + 50, // Центр платформы
+                    groundY - 120 - trapHeight,
+                    100, trapHeight)); // Шипы шириной 100px
 
-                MovingPlatforms.Add(new MovingPlatform(
-                    2300, groundY - 250,
-                    100, platformHeight,
-                    100, 4, false));      // Horizontal
+                // 7. Финишные платформы
+                Platforms.Add(new Rectangle(2100, groundY - 100, 250, platformHeight));
+                Platforms.Add(new Rectangle(2500, groundY - 60, 250, platformHeight));
 
-                // 7. Финальная зона
-                Platforms.Add(new Rectangle(3000, groundY - 100, 250, platformHeight));
-
-                // Настройки уровня
-                TotalLength = 3500;
+                TotalLength = 3000;
                 lastPlatformX = TotalLength;
-
-                // Создание финишного флага
                 CreateFinishFlag();
             }
         }

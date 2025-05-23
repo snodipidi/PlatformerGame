@@ -233,38 +233,83 @@ namespace PlatformerGame.GameStates
         {
             try
             {
-                int size = 24;
-                int margin = 20;
+                int size = 32;
+                int horizontalMargin = 20;
+                int verticalMargin = 12; 
                 _pauseIconBounds = new Rectangle(
-                    _form.ClientSize.Width - size - margin,
-                    margin,
+                    _form.ClientSize.Width - size - horizontalMargin,
+                    verticalMargin,
                     size,
                     size);
 
-                if (_isPaused)
-                {
-                    // Иконка "Play"
-                    Point[] triangle = {
-                        new Point(_pauseIconBounds.Left + 4, _pauseIconBounds.Top + 4),
-                        new Point(_pauseIconBounds.Right - 4, _pauseIconBounds.Top + size / 2),
-                        new Point(_pauseIconBounds.Left + 4, _pauseIconBounds.Bottom - 4)
-                    };
-                    g.FillPolygon(Brushes.White, triangle);
-                }
-                else
-                {
-                    // Иконка "Pause"
-                    g.FillRectangle(Brushes.White, _pauseIconBounds.X + 4, _pauseIconBounds.Y + 4, 4, 16);
-                    g.FillRectangle(Brushes.White, _pauseIconBounds.X + 14, _pauseIconBounds.Y + 4, 4, 16);
-                }
+                g.SmoothingMode = SmoothingMode.AntiAlias;
 
-                // Рамка иконки
-                g.DrawRectangle(Pens.White, _pauseIconBounds);
+                using (var pen = new Pen(Color.White, 1.5f))
+                {
+                    if (_isPaused)
+                    {
+                        // Треугольник Play (центрированный)
+                        float triangleSize = size * 0.6f;
+                        PointF[] triangle = {
+                    new PointF(_pauseIconBounds.Left + (size - triangleSize)/2 + 2,
+                               _pauseIconBounds.Top + (size - triangleSize)/2),
+                    new PointF(_pauseIconBounds.Left + (size - triangleSize)/2 + 2,
+                               _pauseIconBounds.Bottom - (size - triangleSize)/2),
+                    new PointF(_pauseIconBounds.Right - (size - triangleSize)/2 - 2,
+                               _pauseIconBounds.Top + size/2)
+                };
+                        g.FillPolygon(Brushes.White, triangle);
+                    }
+                    else
+                    {
+                        // Две вертикальные линии (точный центр)
+                        float barWidth = size * 0.22f; // 22% ширины
+                        float gap = size * 0.18f;       // 18% промежуток
+                        float totalWidth = 2 * barWidth + gap;
+                        float startX = _pauseIconBounds.Left + (size - totalWidth) / 2;
+
+                        // Левая линия
+                        var leftRect = new RectangleF(
+                            startX,
+                            _pauseIconBounds.Top + size * 0.15f,
+                            barWidth,
+                            size * 0.7f);
+
+                        // Правая линия
+                        var rightRect = new RectangleF(
+                            startX + barWidth + gap,
+                            _pauseIconBounds.Top + size * 0.15f,
+                            barWidth,
+                            size * 0.7f);
+
+                        // Рисуем с закруглением
+                        using (var path = RoundedRect(leftRect, 1.5f))
+                        using (var path2 = RoundedRect(rightRect, 1.5f))
+                        {
+                            g.FillPath(Brushes.White, path);
+                            g.FillPath(Brushes.White, path2);
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Ошибка отрисовки иконки паузы: {ex.Message}");
+                Debug.WriteLine($"Ошибка отрисовки иконки: {ex.Message}");
             }
+        }
+
+        private static GraphicsPath RoundedRect(RectangleF bounds, float radius)
+        {
+            var path = new GraphicsPath();
+            float diameter = radius * 2;
+
+            path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
+            path.AddArc(bounds.Right - diameter, bounds.Y, diameter, diameter, 270, 90);
+            path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
+            path.AddArc(bounds.X, bounds.Bottom - diameter, diameter, diameter, 90, 90);
+            path.CloseFigure();
+
+            return path;
         }
 
         private void DrawPauseMenu(Graphics g)
