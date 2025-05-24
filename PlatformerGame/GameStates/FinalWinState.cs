@@ -7,18 +7,40 @@ using PlatformerGame.Forms;
 
 namespace PlatformerGame.GameStates
 {
+    /// <summary>
+    /// Состояние финального экрана победы.
+    /// </summary>
     public class FinalWinState : IGameState
     {
+        // Ссылка на основную форму игры
         private readonly MainForm _form;
+
+        // Прямоугольник кнопки "В меню"
         private Rectangle _menuButton;
+
+        // Прямоугольник кнопки "Выход"
         private Rectangle _exitButton;
+
+        // Фаза анимации для фонового градиента и конфетти
         private float _animationPhase;
+
+        // Изображение победы
         private readonly Bitmap _victoryImage;
+
+        /// <summary>
+        /// Флаг, включён ли звук
+        /// </summary>
         public static bool IsSoundEnabled { get; set; } = true;
 
+        /// <summary>
+        /// Конструктор состояния победы
+        /// </summary>
+        /// <param name="form">Ссылка на основную форму</param>
         public FinalWinState(MainForm form)
         {
             _form = form;
+
+            // Пытаемся загрузить изображение победы
             try
             {
                 _victoryImage = new Bitmap("Resourses\\victory.png");
@@ -29,9 +51,13 @@ namespace PlatformerGame.GameStates
             }
         }
 
+        /// <summary>
+        /// Отрисовка состояния
+        /// </summary>
+        /// <param name="g">Объект Graphics</param>
         public void Draw(Graphics g)
         {
-            // Анимированный градиентный фон
+            // Рисуем анимированный градиентный фон
             using (var brush = new LinearGradientBrush(
                 new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height),
                 Color.FromArgb((int)(Math.Sin(_animationPhase) * 50 + 50), 50, 200, 50),
@@ -41,7 +67,7 @@ namespace PlatformerGame.GameStates
                 g.FillRectangle(brush, 0, 0, _form.ClientSize.Width, _form.ClientSize.Height);
             }
 
-            // Изображение победы
+            // Отрисовываем изображение победы или надпись
             if (_victoryImage != null)
             {
                 int imageWidth = _form.ClientSize.Width / 2;
@@ -63,14 +89,15 @@ namespace PlatformerGame.GameStates
                 }
             }
 
-            // Конфетти
+            // Отрисовываем конфетти
             DrawConfetti(g);
 
-            // Кнопки
+            // Отрисовываем кнопки
             DrawButton(g, _menuButton, "В главное меню", Brushes.Gold, Pens.DarkGoldenrod);
             DrawButton(g, _exitButton, "Выход", Brushes.OrangeRed, Pens.DarkRed);
         }
 
+        // Отрисовка конфетти на экране
         private void DrawConfetti(Graphics g)
         {
             Random rand = new Random();
@@ -88,17 +115,16 @@ namespace PlatformerGame.GameStates
             }
         }
 
+        // Отрисовка кнопки с текстом
         private void DrawButton(Graphics g, Rectangle rect, string text,
             Brush fill, Pen border)
         {
-            // Фон
             using (var path = RoundedRect(rect, 20))
             {
                 g.FillPath(fill, path);
                 g.DrawPath(border, path);
             }
 
-            // Текст
             using (var font = new Font("Arial", 20, FontStyle.Bold))
             {
                 StringFormat format = new StringFormat
@@ -110,12 +136,21 @@ namespace PlatformerGame.GameStates
             }
         }
 
+        /// <summary>
+        /// Обработка клавиатурного ввода
+        /// </summary>
+        /// <param name="e">Событие нажатия клавиши</param>
         public void HandleInput(KeyEventArgs e)
         {
+            // Если нажата Escape — переход в главное меню
             if (e.KeyCode == Keys.Escape)
                 _form.ShowMainMenu();
         }
 
+        /// <summary>
+        /// Обработка нажатия мыши
+        /// </summary>
+        /// <param name="e">Событие нажатия мыши</param>
         public void HandleMouseClick(MouseEventArgs e)
         {
             if (_menuButton.Contains(e.Location))
@@ -125,37 +160,55 @@ namespace PlatformerGame.GameStates
                 _form.Close();
         }
 
+        /// <summary>
+        /// Действия при входе в состояние
+        /// </summary>
         public void OnEnter()
         {
             UpdateButtonPositions();
         }
 
+        /// <summary>
+        /// Воспроизводит звук победы (если включён)
+        /// </summary>
         public static void PlayVictorySound()
         {
             if (!IsSoundEnabled) return;
-            // Добавьте свой звук победы
-            SystemSounds.Exclamation.Play(); // временная заглушка
+
+            SystemSounds.Exclamation.Play(); // Временный звук
         }
 
+        /// <summary>
+        /// Освобождение ресурсов при выходе
+        /// </summary>
         public void OnExit()
         {
             _victoryImage?.Dispose();
         }
 
+        /// <summary>
+        /// Обработка изменения размера окна
+        /// </summary>
+        /// <param name="e">Событие изменения</param>
         public void OnResize(EventArgs e)
         {
             UpdateButtonPositions();
         }
 
+        /// <summary>
+        /// Обновление логики состояния
+        /// </summary>
         public void Update()
         {
             _animationPhase += 0.05f;
             UpdateButtonPositions();
         }
 
+        // Обновление положения кнопок в зависимости от размера окна
         private void UpdateButtonPositions()
         {
             int centerX = _form.ClientSize.Width / 2;
+
             _menuButton = new Rectangle(
                 centerX - 150,
                 _form.ClientSize.Height - 200,
@@ -167,6 +220,7 @@ namespace PlatformerGame.GameStates
                 300, 50);
         }
 
+        // Метод для создания закруглённых прямоугольников
         private GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
             var path = new GraphicsPath();
