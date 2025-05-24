@@ -43,16 +43,9 @@ namespace PlatformerGame
             }
         }
 
-        public static void PlayGameOverSound()
-        {
-            if (!IsSoundEnabled) return;
-            _gameoverSound?.Play();
-        }
 
-        public static void PlayWinSound()
-        {
-            if (!IsSoundEnabled) return;
-            _winSound?.Play();
-        }
+        public static void PlayGameOverSound() {}
+
+        public static void PlayWinSound() {}
     }
 }

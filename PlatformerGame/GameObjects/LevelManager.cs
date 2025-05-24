@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Media;
 
 namespace PlatformerGame.GameObjects
 {
@@ -8,6 +9,8 @@ namespace PlatformerGame.GameObjects
     {
         private List<LevelData> _levels = new List<LevelData>();
         private int _currentLevelIndex = 0;
+        public static bool IsSoundEnabled { get; set; } = true;
+        private static SoundPlayer _victorySound;
 
         public class EnemyInfo
         {
@@ -124,6 +127,8 @@ namespace PlatformerGame.GameObjects
             return _levels[levelNumber - 1].IsLocked == false;
         }
 
+
+
         public void UnlockNextLevel()
         {
             if (SoundManager.DeveloperMode) return;
@@ -137,7 +142,11 @@ namespace PlatformerGame.GameObjects
 
         public bool HasNextLevel()
         {
-            return _currentLevelIndex + 1 < _levels.Count;
+            if (SoundManager.DeveloperMode)
+                return _currentLevelIndex + 1 < _levels.Count;
+
+            return _currentLevelIndex + 1 < _levels.Count
+                && _levels[_currentLevelIndex + 1].LevelNumber <= 5;
         }
     }
 }

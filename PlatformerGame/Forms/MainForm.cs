@@ -91,14 +91,16 @@ namespace PlatformerGame.Forms
 
         public void CompleteLevel()
         {
-            _gameTimer?.Stop();
-            if (_currentState is PlayingState playingState)
+            if (_levelManager.GetCurrentLevel().LevelNumber == 5)
             {
-                playingState.StopGameTimer();
+                ChangeState(new FinalWinState(this));
             }
-
-            _levelManager.UnlockNextLevel();
-            ChangeState(new LevelCompletedState(this, _levelManager));
+            else
+            {
+                _levelManager.UnlockNextLevel();
+                ChangeState(new LevelCompletedState(this, _levelManager));
+            }
+            _gameTimer?.Stop();
         }
 
         public void GameOver()
