@@ -191,7 +191,12 @@ namespace PlatformerGame.GameStates
             }
         }
 
-        public void OnEnter() { }
+        public void OnEnter()
+        {
+            // Принудительно обновляем список уровней
+            _levelButtons.Clear();
+            UpdateButtonPositions();
+        }
 
         public void OnExit()
         {

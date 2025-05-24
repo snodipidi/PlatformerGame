@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using PlatformerGame.Forms;
 
@@ -9,18 +10,19 @@ namespace PlatformerGame.GameStates
     {
         private readonly MainForm _form;
         private Button _backButton;
-        private Rectangle _toggleRect;       // Область переключателя
-        private bool _soundEnabled;
+        private Rectangle _soundToggleRect;
+        private Rectangle _devModeToggleRect;
 
-        private readonly int ToggleWidth = 80;
-        private readonly int ToggleHeight = 40;
-        private readonly int ToggleMargin = 8;
+        private const int ToggleWidth = 80;
+        private const int ToggleHeight = 40;
+        private const int ToggleMargin = 8;
+        private const int ElementsSpacing = 60;
 
         public SettingsState(MainForm form)
         {
             _form = form;
-            _soundEnabled = SoundManager.IsSoundEnabled;
             InitializeControls();
+            UpdateTogglePositions();
         }
 
         private void InitializeControls()
@@ -39,26 +41,31 @@ namespace PlatformerGame.GameStates
             };
             _backButton.FlatAppearance.BorderSize = 0;
             _backButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 50, 90);
-            _backButton.Click += (s, e) =>
-            {
-                _form.ShowMainMenu();
-            };
-
-            // Расположение переключателя
-            UpdateToggleRect();
+            _backButton.Click += (s, e) => _form.ShowMainMenu();
         }
 
-        private void UpdateToggleRect()
+        private void UpdateTogglePositions()
         {
-            int x = _form.ClientSize.Width / 2 + 80;
-            int y = _form.ClientSize.Height / 2 - ToggleHeight / 2;
-            _toggleRect = new Rectangle(x, y, ToggleWidth, ToggleHeight);
+            int centerX = _form.ClientSize.Width / 2;
+            int startY = _form.ClientSize.Height / 2 - ToggleHeight;
+
+            _soundToggleRect = new Rectangle(
+                centerX + 80,
+                startY,
+                ToggleWidth,
+                ToggleHeight);
+
+            _devModeToggleRect = new Rectangle(
+                centerX + 80,
+                startY + ElementsSpacing,
+                ToggleWidth,
+                ToggleHeight);
         }
 
         public void Draw(Graphics g)
         {
             // Фон с градиентом
-            using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(
+            using (var brush = new LinearGradientBrush(
                 new Rectangle(0, 0, _form.ClientSize.Width, _form.ClientSize.Height),
                 Color.FromArgb(10, 20, 50),
                 Color.FromArgb(40, 60, 100),
@@ -68,6 +75,15 @@ namespace PlatformerGame.GameStates
             }
 
             // Заголовок
+            DrawHeader(g);
+
+            // Переключатели
+            DrawToggleWithLabel(g, "Звук", _soundToggleRect, SoundManager.IsSoundEnabled);
+            DrawToggleWithLabel(g, "Режим разработчика", _devModeToggleRect, SoundManager.DeveloperMode);
+        }
+
+        private void DrawHeader(Graphics g)
+        {
             using (var font = new Font("Segoe UI", 48, FontStyle.Bold))
             using (var brush = new SolidBrush(Color.Cyan))
             {
@@ -75,20 +91,22 @@ namespace PlatformerGame.GameStates
                 var size = g.MeasureString(title, font);
                 g.DrawString(title, font, brush, (_form.ClientSize.Width - size.Width) / 2, 60);
             }
+        }
 
-            // Надпись "Звук"
+        private void DrawToggleWithLabel(Graphics g, string label, Rectangle rect, bool isOn)
+        {
+            // Надпись
             using (var font = new Font("Segoe UI", 32, FontStyle.Bold))
             using (var brush = new SolidBrush(Color.LightCyan))
             {
-                string soundLabel = "Звук";
-                var size = g.MeasureString(soundLabel, font);
-                int x = _form.ClientSize.Width / 2 - 200;
-                int y = _form.ClientSize.Height / 2 - (int)size.Height / 2;
-                g.DrawString(soundLabel, font, brush, x, y);
+                var textSize = g.MeasureString(label, font);
+                g.DrawString(label, font, brush,
+                    rect.X - textSize.Width - 20,
+                    rect.Y + (rect.Height - textSize.Height) / 2);
             }
 
-            // Рисуем переключатель toggle switch
-            DrawToggleSwitch(g, _toggleRect, _soundEnabled);
+            // Переключатель
+            DrawToggleSwitch(g, rect, isOn);
         }
 
         private void DrawToggleSwitch(Graphics g, Rectangle rect, bool isOn)
@@ -98,35 +116,34 @@ namespace PlatformerGame.GameStates
             Color toggleColor = Color.White;
             int radius = rect.Height / 2;
 
-            // Рисуем фон переключателя (скруглённый прямоугольник)
+            // Фон переключателя
             using (var path = RoundedRect(rect, radius))
             using (var backBrush = new SolidBrush(backColor))
             {
                 g.FillPath(backBrush, path);
             }
 
-            // Позиция круга внутри переключателя
+            // Ползунок
             int circleDiameter = rect.Height - ToggleMargin * 2;
             int circleX = isOn ? rect.Right - circleDiameter - ToggleMargin : rect.Left + ToggleMargin;
             int circleY = rect.Top + ToggleMargin;
 
-            // Рисуем круг (ползунок)
             using (var toggleBrush = new SolidBrush(toggleColor))
             {
                 g.FillEllipse(toggleBrush, circleX, circleY, circleDiameter, circleDiameter);
             }
         }
 
-        // Метод для рисования скругленного прямоугольника
-        private System.Drawing.Drawing2D.GraphicsPath RoundedRect(Rectangle bounds, int radius)
+        private GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
+            var path = new GraphicsPath();
             int diameter = radius * 2;
-            var path = new System.Drawing.Drawing2D.GraphicsPath();
 
-            path.AddArc(bounds.Left, bounds.Top, diameter, diameter, 180, 90);
-            path.AddArc(bounds.Right - diameter, bounds.Top, diameter, diameter, 270, 90);
-            path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
-            path.AddArc(bounds.Left, bounds.Bottom - diameter, diameter, diameter, 90, 90);
+            path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
+            path.AddArc(bounds.X + bounds.Width - diameter, bounds.Y, diameter, diameter, 270, 90);
+            path.AddArc(bounds.X + bounds.Width - diameter, bounds.Y + bounds.Height - diameter,
+                       diameter, diameter, 0, 90);
+            path.AddArc(bounds.X, bounds.Y + bounds.Height - diameter, diameter, diameter, 90, 90);
             path.CloseFigure();
 
             return path;
@@ -135,18 +152,32 @@ namespace PlatformerGame.GameStates
         public void HandleInput(KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
-            {
                 _form.ShowMainMenu();
-            }
         }
 
         public void HandleMouseClick(MouseEventArgs e)
         {
-            // Проверяем клик внутри переключателя
-            if (_toggleRect.Contains(e.Location))
+            if (_soundToggleRect.Contains(e.Location))
             {
-                _soundEnabled = !_soundEnabled;
-                SoundManager.IsSoundEnabled = _soundEnabled;
+                SoundManager.IsSoundEnabled = !SoundManager.IsSoundEnabled;
+                _form.Invalidate();
+            }
+
+            if (_devModeToggleRect.Contains(e.Location))
+            {
+                bool newMode = !SoundManager.DeveloperMode;
+
+                if (newMode)
+                {
+                    var result = MessageBox.Show(
+                        "Включение режима разработчика разблокирует все уровни! Продолжить?",
+                        "Предупреждение",
+                        MessageBoxButtons.YesNo);
+
+                    if (result != DialogResult.Yes) return;
+                }
+
+                SoundManager.DeveloperMode = newMode;
                 _form.Invalidate();
             }
         }
@@ -166,15 +197,13 @@ namespace PlatformerGame.GameStates
         public void OnResize(EventArgs e)
         {
             _backButton.Location = new Point(20, 20);
-            UpdateToggleRect();
+            UpdateTogglePositions();
             _form.Invalidate();
         }
 
         public void Update()
         {
-            // Нет нужды
+            // Не требуется
         }
-
-
     }
 }

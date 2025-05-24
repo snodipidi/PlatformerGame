@@ -12,7 +12,7 @@ namespace PlatformerGame.GameObjects
         public class EnemyInfo
         {
             public int X { get; set; }
-            public int PlatformY { get; set; } // Относительно groundY
+            public int PlatformY { get; set; }
             public int MoveRange { get; set; }
             public int Speed { get; set; }
         }
@@ -24,7 +24,7 @@ namespace PlatformerGame.GameObjects
 
         private void InitializeLevels()
         {
-            // Уровень 1
+            // Инициализация уровней без изменений
             _levels.Add(new LevelData
             {
                 LevelNumber = 1,
@@ -34,7 +34,6 @@ namespace PlatformerGame.GameObjects
                 Difficulty = 1
             });
 
-            // Уровень 2 (с ловушками)
             _levels.Add(new LevelData
             {
                 LevelNumber = 2,
@@ -50,26 +49,22 @@ namespace PlatformerGame.GameObjects
                 }
             });
 
-            // Уровень 3 (с врагами)
             var level3 = new LevelData
             {
                 LevelNumber = 3,
                 IsLocked = true,
                 Length = 4000,
                 PlatformCount = 0,
-                Difficulty = 5
-            };
-
-            // Добавляем информацию о врагах через EnemyInfo
-            level3.EnemyInfos = new List<EnemyInfo>
-            {
-                new EnemyInfo { X = 950, PlatformY = -120, MoveRange = 150, Speed = 3 },
-                new EnemyInfo { X = 1950, PlatformY = -200, MoveRange = 120, Speed = 4 },
-                new EnemyInfo { X = 3250, PlatformY = -130, MoveRange = 100, Speed = 2 }
+                Difficulty = 5,
+                EnemyInfos = new List<EnemyInfo>
+                {
+                    new EnemyInfo { X = 950, PlatformY = -120, MoveRange = 150, Speed = 3 },
+                    new EnemyInfo { X = 1950, PlatformY = -200, MoveRange = 120, Speed = 4 },
+                    new EnemyInfo { X = 3250, PlatformY = -130, MoveRange = 100, Speed = 2 }
+                }
             };
             _levels.Add(level3);
 
-            // Уровень 4 (с колоннами)
             _levels.Add(new LevelData
             {
                 LevelNumber = 4,
@@ -95,28 +90,44 @@ namespace PlatformerGame.GameObjects
 
         public List<LevelData> GetAllLevels()
         {
-            // Для теста разблокируем все уровни
-            foreach (var level in _levels)
+            if (SoundManager.DeveloperMode)
             {
-                level.IsLocked = false;
+                // Возвращаем копию уровней с разблокировкой
+                return _levels.Select(l => new LevelData
+                {
+                    LevelNumber = l.LevelNumber,
+                    IsLocked = false, // Принудительно разблокируем
+                    Length = l.Length,
+                    PlatformCount = l.PlatformCount,
+                    Difficulty = l.Difficulty,
+                    Traps = l.Traps,
+                    EnemyInfos = l.EnemyInfos,
+                    Description = l.Description
+                }).ToList();
             }
             return _levels.ToList();
-
-            // В боевой версии:
-            // return _levels.ToList();
         }
 
         public void SetCurrentLevel(int levelNumber)
         {
             var level = _levels.FirstOrDefault(l => l.LevelNumber == levelNumber);
-            if (level != null && !level.IsLocked)
+            if (level != null && (SoundManager.DeveloperMode || !level.IsLocked))
             {
                 _currentLevelIndex = _levels.IndexOf(level);
             }
         }
 
+        public bool IsLevelUnlocked(int levelNumber)
+        {
+            if (SoundManager.DeveloperMode) return true;
+            if (levelNumber < 1 || levelNumber > _levels.Count) return false;
+            return _levels[levelNumber - 1].IsLocked == false;
+        }
+
         public void UnlockNextLevel()
         {
+            if (SoundManager.DeveloperMode) return;
+
             int nextIndex = _currentLevelIndex + 1;
             if (nextIndex < _levels.Count)
             {

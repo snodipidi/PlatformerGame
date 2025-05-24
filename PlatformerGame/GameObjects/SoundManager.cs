@@ -12,6 +12,7 @@ namespace PlatformerGame
 
         // Флаг включения звука (по умолчанию включён)
         public static bool IsSoundEnabled { get; set; } = true;
+        public static bool DeveloperMode { get; set; }
 
         public static void Initialize()
         {
