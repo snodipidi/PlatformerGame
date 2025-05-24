@@ -255,7 +255,10 @@ namespace PlatformerGame.GameStates
         {
             _form.MouseMove += HandleMouseMove;
             _form.MouseClick += HandleMouseClick;
+
+            SoundManager.PlayMusic("music1.wav");
         }
+
 
         public void OnExit()
         {
@@ -263,6 +266,7 @@ namespace PlatformerGame.GameStates
             _form.MouseMove -= HandleMouseMove;
             _form.MouseClick -= HandleMouseClick;
             _background?.Dispose();
+            SoundManager.StopMusic();
         }
 
         public void OnResize(EventArgs e)

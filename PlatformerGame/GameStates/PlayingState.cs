@@ -477,14 +477,16 @@ namespace PlatformerGame.GameStates
         {
             _form.MouseMove += HandleMouseMove;
             _form.MouseClick += HandleMouseClickWrapper;
+            SoundManager.PlayMusic("music2.wav");
         }
 
         public void OnExit()
         {
-            StopGameTimer(); // Останавливаем таймер при выходе
+            StopGameTimer();
             DisposeResources();
             _form.MouseMove -= HandleMouseMove;
             _form.MouseClick -= HandleMouseClickWrapper;
+            SoundManager.StopMusic();
         }
 
         private void DisposeResources()

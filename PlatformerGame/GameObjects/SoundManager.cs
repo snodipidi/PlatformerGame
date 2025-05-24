@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Media;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
+using System.Media;
 
 namespace PlatformerGame
 {
@@ -9,17 +9,19 @@ namespace PlatformerGame
     {
         private static SoundPlayer _gameoverSound;
         private static SoundPlayer _winSound;
+        private static SoundPlayer _musicPlayer;
 
-        // Флаг включения звука (по умолчанию включён)
         public static bool IsSoundEnabled { get; set; } = true;
         public static bool DeveloperMode { get; set; }
 
+        private static string _soundsPath;
+
         public static void Initialize()
         {
-            string soundsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Sounds");
+            _soundsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Sounds");
 
-            _gameoverSound = LoadSound(Path.Combine(soundsPath, "gameover.wav"));
-            _winSound = LoadSound(Path.Combine(soundsPath, "win.wav"));
+            _gameoverSound = LoadSound(Path.Combine(_soundsPath, "gameover.wav"));
+            _winSound = LoadSound(Path.Combine(_soundsPath, "win.wav"));
         }
 
         private static SoundPlayer LoadSound(string path)
@@ -33,7 +35,7 @@ namespace PlatformerGame
                 }
 
                 var player = new SoundPlayer(path);
-                player.Load(); // Предварительная загрузка
+                player.Load();
                 return player;
             }
             catch (Exception ex)
@@ -43,19 +45,12 @@ namespace PlatformerGame
             }
         }
 
-
         public static void PlayGameOverSound()
         {
             if (IsSoundEnabled && _gameoverSound != null)
             {
-                try
-                {
-                    _gameoverSound.Play();
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Ошибка воспроизведения звука поражения: {ex.Message}");
-                }
+                try { _gameoverSound.Play(); }
+                catch (Exception ex) { Debug.WriteLine($"Ошибка воспроизведения звука поражения: {ex.Message}"); }
             }
         }
 
@@ -63,16 +58,47 @@ namespace PlatformerGame
         {
             if (IsSoundEnabled && _winSound != null)
             {
-                try
-                {
-                    _winSound.Play();
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Ошибка воспроизведения звука победы: {ex.Message}");
-                }
+                try { _winSound.Play(); }
+                catch (Exception ex) { Debug.WriteLine($"Ошибка воспроизведения звука победы: {ex.Message}"); }
             }
         }
 
+        public static void PlayMusic(string fileName)
+        {
+            StopMusic();
+
+            if (!IsSoundEnabled) return;
+
+            string path = Path.Combine(_soundsPath, fileName);
+            if (!File.Exists(path))
+            {
+                Debug.WriteLine($"Музыка не найдена: {path}");
+                return;
+            }
+
+            try
+            {
+                _musicPlayer = new SoundPlayer(path);
+                _musicPlayer.Load();
+                _musicPlayer.PlayLooping(); // Повторяется бесконечно
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка воспроизведения музыки: {ex.Message}");
+            }
+        }
+
+        public static void StopMusic()
+        {
+            try
+            {
+                _musicPlayer?.Stop();
+                _musicPlayer = null;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка остановки музыки: {ex.Message}");
+            }
+        }
     }
 }
