@@ -10,8 +10,10 @@ namespace PlatformerGame.GameStates
     {
         private readonly MainForm _form;
         private Button _backButton;
+
         private Rectangle _soundToggleRect;
         private Rectangle _devModeToggleRect;
+        private Rectangle _musicToggleRect;
 
         private const int ToggleWidth = 80;
         private const int ToggleHeight = 40;
@@ -60,6 +62,12 @@ namespace PlatformerGame.GameStates
                 startY + ElementsSpacing,
                 ToggleWidth,
                 ToggleHeight);
+
+            _musicToggleRect = new Rectangle(
+                centerX + 80,
+                startY + ElementsSpacing * 2,
+                ToggleWidth,
+                ToggleHeight);
         }
 
         public void Draw(Graphics g)
@@ -80,6 +88,7 @@ namespace PlatformerGame.GameStates
             // Переключатели
             DrawToggleWithLabel(g, "Звук", _soundToggleRect, SoundManager.IsSoundEnabled);
             DrawToggleWithLabel(g, "Режим разработчика", _devModeToggleRect, SoundManager.DeveloperMode);
+            DrawToggleWithLabel(g, "Музыка", _musicToggleRect, SoundManager.IsMusicEnabled);
         }
 
         private void DrawHeader(Graphics g)
@@ -162,8 +171,7 @@ namespace PlatformerGame.GameStates
                 SoundManager.IsSoundEnabled = !SoundManager.IsSoundEnabled;
                 _form.Invalidate();
             }
-
-            if (_devModeToggleRect.Contains(e.Location))
+            else if (_devModeToggleRect.Contains(e.Location))
             {
                 bool newMode = !SoundManager.DeveloperMode;
 
@@ -178,6 +186,17 @@ namespace PlatformerGame.GameStates
                 }
 
                 SoundManager.DeveloperMode = newMode;
+                _form.Invalidate();
+            }
+            else if (_musicToggleRect.Contains(e.Location))
+            {
+                SoundManager.IsMusicEnabled = !SoundManager.IsMusicEnabled;
+
+                if (!SoundManager.IsMusicEnabled)
+                {
+                    SoundManager.StopMusic();
+                }
+
                 _form.Invalidate();
             }
         }

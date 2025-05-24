@@ -235,7 +235,7 @@ namespace PlatformerGame.GameStates
             {
                 int size = 32;
                 int horizontalMargin = 20;
-                int verticalMargin = 12; 
+                int verticalMargin = 12;
                 _pauseIconBounds = new Rectangle(
                     _form.ClientSize.Width - size - horizontalMargin,
                     verticalMargin,

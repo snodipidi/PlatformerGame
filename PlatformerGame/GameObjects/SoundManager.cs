@@ -63,11 +63,13 @@ namespace PlatformerGame
             }
         }
 
+        public static bool IsMusicEnabled { get; set; } = true;
+
         public static void PlayMusic(string fileName)
         {
             StopMusic();
 
-            if (!IsSoundEnabled) return;
+            if (!IsSoundEnabled || !IsMusicEnabled) return;
 
             string path = Path.Combine(_soundsPath, fileName);
             if (!File.Exists(path))
@@ -87,6 +89,7 @@ namespace PlatformerGame
                 Debug.WriteLine($"Ошибка воспроизведения музыки: {ex.Message}");
             }
         }
+
 
         public static void StopMusic()
         {
