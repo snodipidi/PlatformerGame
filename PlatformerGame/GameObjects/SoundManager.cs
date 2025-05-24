@@ -44,8 +44,35 @@ namespace PlatformerGame
         }
 
 
-        public static void PlayGameOverSound() {}
+        public static void PlayGameOverSound()
+        {
+            if (IsSoundEnabled && _gameoverSound != null)
+            {
+                try
+                {
+                    _gameoverSound.Play();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Ошибка воспроизведения звука поражения: {ex.Message}");
+                }
+            }
+        }
 
-        public static void PlayWinSound() {}
+        public static void PlayWinSound()
+        {
+            if (IsSoundEnabled && _winSound != null)
+            {
+                try
+                {
+                    _winSound.Play();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Ошибка воспроизведения звука победы: {ex.Message}");
+                }
+            }
+        }
+
     }
 }

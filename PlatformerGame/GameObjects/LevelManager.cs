@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Media;
@@ -109,6 +110,21 @@ namespace PlatformerGame.GameObjects
                 }).ToList();
             }
             return _levels.ToList();
+        }
+
+        public float GetTotalProgress()
+        {
+            if (SoundManager.DeveloperMode) return 1f;
+
+            int totalLevels = _levels.Count;
+            if (totalLevels <= 1) return 0f; // Защита если нет уровней
+
+            int passedLevels = _levels.Count(l => !l.IsLocked) - 1;
+
+            // Гарантируем, что значение не будет отрицательным
+            passedLevels = Math.Max(passedLevels, 0);
+
+            return (float)passedLevels / (totalLevels - 1);
         }
 
         public void SetCurrentLevel(int levelNumber)

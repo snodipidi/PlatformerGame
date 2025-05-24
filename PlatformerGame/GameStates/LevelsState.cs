@@ -17,6 +17,10 @@ namespace PlatformerGame.GameStates
         private readonly Font _buttonFont = new Font("Arial", 12, FontStyle.Bold);
         private int _hoveredIndex = -1;
         private bool _hoveringBack = false;
+        private Rectangle _progressBarRect;
+        private Rectangle _progressFillRect;
+        private const int ProgressBarHeight = 25;
+        private const int ProgressBarMargin = 20;
 
         public LevelsState(MainForm form, LevelManager levelManager)
         {
@@ -31,9 +35,11 @@ namespace PlatformerGame.GameStates
 
         private void UpdateButtonPositions()
         {
-            _levelButtons.Clear();
             int centerX = _form.ClientSize.Width / 2;
-            int startY = _form.ClientSize.Height / 4;
+            _levelButtons.Clear();
+
+            // Стартовая позиция для кнопок уровней
+            int startY = _form.ClientSize.Height / 4 - 50;
 
             foreach (var level in _levelManager.GetAllLevels())
             {
@@ -41,7 +47,21 @@ namespace PlatformerGame.GameStates
                 startY += 70;
             }
 
-            _backButton = new Rectangle(centerX - 100, _form.ClientSize.Height - 100, 200, 50);
+            // Новые координаты для кнопки "Назад" (выше прогресс-бара)
+            _backButton = new Rectangle(
+                centerX - 100,
+                _form.ClientSize.Height - 180,
+                200,
+                50
+            );
+
+            // Позиция прогресс-бара (ниже кнопки "Назад")
+            _progressBarRect = new Rectangle(
+                ProgressBarMargin,
+                _form.ClientSize.Height - 100, 
+                _form.ClientSize.Width - ProgressBarMargin * 2,
+                ProgressBarHeight
+            );
         }
 
         public void OnResize(EventArgs e)
@@ -135,9 +155,60 @@ namespace PlatformerGame.GameStates
             {
                 g.DrawString("НАЗАД", font, Brushes.Black, _backButton, formatCenter);
             }
+            DrawProgressBar(g);
         }
 
+        private void DrawProgressBar(Graphics g)
+        {
+            int width = _form.ClientSize.Width - ProgressBarMargin * 2;
+            _progressBarRect = new Rectangle(
+                ProgressBarMargin,
+                _form.ClientSize.Height - ProgressBarHeight - ProgressBarMargin,
+                width,
+                ProgressBarHeight);
 
+            // Фон
+            g.FillRectangle(Brushes.DarkSlateGray, _progressBarRect);
+
+            float rawProgress = _levelManager.GetTotalProgress();
+            float progress = rawProgress < 0f ? 0f : rawProgress > 1f ? 1f : rawProgress;
+            int fillWidth = Math.Max((int)(_progressBarRect.Width * progress), 1); 
+
+            _progressFillRect = new Rectangle(
+                _progressBarRect.X,
+                _progressBarRect.Y,
+                fillWidth,
+                _progressBarRect.Height);
+
+            // Фикс для градиента при малой ширине
+            if (fillWidth > 1)
+            {
+                using (var brush = new LinearGradientBrush(
+                    _progressFillRect,
+                    Color.LimeGreen,
+                    Color.DarkGreen,
+                    0f))
+                {
+                    g.FillRectangle(brush, _progressFillRect);
+                }
+            }
+            else
+            {
+                g.FillRectangle(Brushes.LimeGreen, _progressFillRect);
+            }
+
+            // Остальной код без изменений
+            g.DrawRectangle(Pens.Black, _progressBarRect);
+
+            using (var font = new Font("Arial", 14, FontStyle.Bold))
+            {
+                string text = $"Прогресс: {(int)(progress * 100)}%";
+                var textSize = g.MeasureString(text, font);
+                g.DrawString(text, font, Brushes.White,
+                    _progressBarRect.X + (_progressBarRect.Width - textSize.Width) / 2,
+                    _progressBarRect.Y - textSize.Height - 5);
+            }
+        }
 
         public void HandleMouseClick(MouseEventArgs e)
         {
@@ -158,6 +229,7 @@ namespace PlatformerGame.GameStates
                 _form.ShowMainMenu();
             }
         }
+
 
         public void HandleMouseMove(MouseEventArgs e)
         {
@@ -203,7 +275,6 @@ namespace PlatformerGame.GameStates
             _buttonFont.Dispose();
         }
 
-        // Вспомогательный метод для закруглённых прямоугольников
         private static GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
             int diameter = radius * 2;
