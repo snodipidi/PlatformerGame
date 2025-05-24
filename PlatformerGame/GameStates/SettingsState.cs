@@ -11,9 +11,8 @@ namespace PlatformerGame.GameStates
         private readonly MainForm _form;
         private Button _backButton;
 
-        private Rectangle _soundToggleRect;
-        private Rectangle _devModeToggleRect;
         private Rectangle _musicToggleRect;
+        private Rectangle _devModeToggleRect;
 
         private const int ToggleWidth = 80;
         private const int ToggleHeight = 40;
@@ -51,21 +50,15 @@ namespace PlatformerGame.GameStates
             int centerX = _form.ClientSize.Width / 2;
             int startY = _form.ClientSize.Height / 2 - ToggleHeight;
 
-            _soundToggleRect = new Rectangle(
+            _devModeToggleRect = new Rectangle(
                 centerX + 80,
                 startY,
                 ToggleWidth,
                 ToggleHeight);
 
-            _devModeToggleRect = new Rectangle(
-                centerX + 80,
-                startY + ElementsSpacing,
-                ToggleWidth,
-                ToggleHeight);
-
             _musicToggleRect = new Rectangle(
                 centerX + 80,
-                startY + ElementsSpacing * 2,
+                startY + ElementsSpacing,
                 ToggleWidth,
                 ToggleHeight);
         }
@@ -86,9 +79,8 @@ namespace PlatformerGame.GameStates
             DrawHeader(g);
 
             // Переключатели
-            DrawToggleWithLabel(g, "Звук", _soundToggleRect, SoundManager.IsSoundEnabled);
             DrawToggleWithLabel(g, "Режим разработчика", _devModeToggleRect, SoundManager.DeveloperMode);
-            DrawToggleWithLabel(g, "Музыка", _musicToggleRect, SoundManager.IsMusicEnabled);
+            DrawToggleWithLabel(g, "Музыка и звук", _musicToggleRect, SoundManager.IsSoundEnabled);
         }
 
         private void DrawHeader(Graphics g)
@@ -120,19 +112,16 @@ namespace PlatformerGame.GameStates
 
         private void DrawToggleSwitch(Graphics g, Rectangle rect, bool isOn)
         {
-            // Цвета
             Color backColor = isOn ? Color.FromArgb(100, 220, 100) : Color.FromArgb(150, 150, 150);
             Color toggleColor = Color.White;
             int radius = rect.Height / 2;
 
-            // Фон переключателя
             using (var path = RoundedRect(rect, radius))
             using (var backBrush = new SolidBrush(backColor))
             {
                 g.FillPath(backBrush, path);
             }
 
-            // Ползунок
             int circleDiameter = rect.Height - ToggleMargin * 2;
             int circleX = isOn ? rect.Right - circleDiameter - ToggleMargin : rect.Left + ToggleMargin;
             int circleY = rect.Top + ToggleMargin;
@@ -166,12 +155,7 @@ namespace PlatformerGame.GameStates
 
         public void HandleMouseClick(MouseEventArgs e)
         {
-            if (_soundToggleRect.Contains(e.Location))
-            {
-                SoundManager.IsSoundEnabled = !SoundManager.IsSoundEnabled;
-                _form.Invalidate();
-            }
-            else if (_devModeToggleRect.Contains(e.Location))
+            if (_devModeToggleRect.Contains(e.Location))
             {
                 bool newMode = !SoundManager.DeveloperMode;
 
@@ -190,11 +174,18 @@ namespace PlatformerGame.GameStates
             }
             else if (_musicToggleRect.Contains(e.Location))
             {
-                SoundManager.IsMusicEnabled = !SoundManager.IsMusicEnabled;
+                // Переключаем звук и музыку вместе
+                SoundManager.IsSoundEnabled = !SoundManager.IsSoundEnabled;
 
-                if (!SoundManager.IsMusicEnabled)
+                if (!SoundManager.IsSoundEnabled)
                 {
                     SoundManager.StopMusic();
+                }
+                else
+                {
+                    // Можно добавить воспроизведение музыки из меню или игры по необходимости
+                    // Например:
+                    // SoundManager.PlayMusic("music1.wav");
                 }
 
                 _form.Invalidate();
