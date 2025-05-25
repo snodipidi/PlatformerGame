@@ -7,57 +7,144 @@ using System.Linq;
 
 namespace PlatformerGame.GameObjects
 {
+    /// <summary>
+    /// Класс Level представляет уровень игры с платформами, ловушками, врагами и прочими элементами.
+    /// </summary>
     public class Level
     {
+        /// <summary>
+        /// Начальная платформа, с которой игрок стартует.
+        /// </summary>
         public Rectangle StartPlatform { get; }
+
+        /// <summary>
+        /// Список всех платформ уровня.
+        /// </summary>
         public List<Rectangle> Platforms { get; } = new List<Rectangle>();
+
+        /// <summary>
+        /// Смещение камеры относительно начала уровня.
+        /// </summary>
         public int CameraOffset { get; set; }
+
+        /// <summary>
+        /// Прямоугольник, обозначающий финишный флаг.
+        /// </summary>
         public Rectangle FinishFlag { get; private set; }
+
+        /// <summary>
+        /// Флаг, показывающий, завершён ли уровень.
+        /// </summary>
         public bool IsLevelCompleted { get; private set; }
+
+        /// <summary>
+        /// Общая длина уровня в пикселях.
+        /// </summary>
         public int TotalLength { get; private set; }
+
+        /// <summary>
+        /// Текстура финишного флага.
+        /// </summary>
         public Bitmap FinishFlagTexture => _finishFlagTexture;
+
+        /// <summary>
+        /// Стартовая позиция игрока по оси X.
+        /// </summary>
         public float StartPosition => StartPlatform.X + 50;
+
+        /// <summary>
+        /// Список всех ловушек (шипов) на уровне.
+        /// </summary>
         public List<Rectangle> Traps { get; } = new List<Rectangle>();
+
+        /// <summary>
+        /// Список всех врагов на уровне.
+        /// </summary>
         public List<Enemy> Enemies { get; } = new List<Enemy>();
+
+        /// <summary>
+        /// Список врагов, движущихся по колоннам вверх-вниз.
+        /// </summary>
         public List<ColumnEnemy> ColumnEnemies { get; } = new List<ColumnEnemy>();
+
+        /// <summary>
+        /// Список всех движущихся платформ.
+        /// </summary>
         public List<MovingPlatform> MovingPlatforms { get; } = new List<MovingPlatform>();
 
+        /// <summary>
+        /// Генератор случайных чисел.
+        /// </summary>
         private readonly Random random = new Random();
+
+        /// <summary>
+        /// X-координата конца последней платформы.
+        /// </summary>
         private int lastPlatformX;
+
+        /// <summary>
+        /// Размеры экрана (ширина и высота).
+        /// </summary>
         private readonly Size screenSize;
+
+        /// <summary>
+        /// Текстура блока (платформы).
+        /// </summary>
         private readonly Bitmap _blockTexture;
+
+        /// <summary>
+        /// Текстура финишного флага.
+        /// </summary>
         private readonly Bitmap _finishFlagTexture;
+
+        /// <summary>
+        /// Ширина зоны финиша.
+        /// </summary>
         private const int FinishAreaWidth = 300;
 
+        /// <summary>
+        /// Текущий прогресс игрока в уровне (0.0 - 1.0).
+        /// </summary>
         public float Progress
         {
             get
             {
+                // Если уровень слишком короткий, считаем прогресс завершённым
                 if (TotalLength <= StartPosition) return 1f;
+                // Общая дистанция от старта до финиша
                 float totalDistance = FinishFlag.X - StartPosition;
+                // Пройденная дистанция (учитываем смещение камеры)
                 float traveledDistance = CameraOffset + (screenSize.Width / 3) - StartPosition;
-
+                // Вычисляем прогресс
                 float progress = traveledDistance / totalDistance;
                 return Math.Min(1f, Math.Max(0f, progress));
             }
         }
 
+        /// <summary>
+        /// Инициализирует новый уровень с заданными размерами экрана и параметрами уровня.
+        /// В зависимости от номера уровня, создаёт уникальные платформы, ловушки, врагов и другие препятствия.
+        /// </summary>
+        /// <param name="screenSize">Размер экрана, на котором отображается уровень.</param>
+        /// <param name="data">Объект данных уровня, включающий номер уровня, сложность и количество платформ.</param>
         public Level(Size screenSize, LevelData data = null)
         {
+            // Пытаемся загрузить текстуры блоков и флажка финиша
             try
             {
                 _blockTexture = new Bitmap("Resourses\\block.png");
                 _finishFlagTexture = new Bitmap("Resourses\\finish_flag.png");
             }
+            // Если не удалось — оставляем null
             catch
             {
                 _blockTexture = null;
                 _finishFlagTexture = null;
             }
-
+            // Сохраняем размер экрана
             this.screenSize = screenSize;
+            // Устанавливаем общую длину уровня (по умолчанию — 3000)
             TotalLength = data?.Length ?? 3000;
-
             // Стартовая платформа
             StartPlatform = new Rectangle(0, screenSize.Height - 100, 300, 20);
             Platforms.Add(StartPlatform);
@@ -424,52 +511,82 @@ namespace PlatformerGame.GameObjects
             }
         }
 
+        /// <summary>
+        /// Проверяет, сталкивается ли игрок с врагами (обычными или колоннами) либо с ловушками.
+        /// </summary>
+        /// <param name="player">Игрок, для которого проверяется столкновение.</param>
+        /// <returns>Возвращает true, если произошло столкновение; иначе false.</returns>
         public bool CheckPlayerCollision(Player player)
         {
+            // Получаем границы игрока
             var playerBounds = player.GetBounds();
+            // Проверяем столкновение с врагами-колоннами
             foreach (var enemy in ColumnEnemies)
             {
+                // Если границы игрока пересекаются с зоной поражения колонны
                 if (playerBounds.IntersectsWith(enemy.GetKillZone()))
                     return true;
             }
+            // Проверяем столкновение с обычными врагами
             foreach (var enemy in Enemies)
             {
+                // Если границы игрока пересекаются с границами врага
                 if (playerBounds.IntersectsWith(enemy.Bounds))
                     return true;
             }
+            // Проверяем столкновение с ловушками
             foreach (var trap in Traps)
             {
+                // Определяем увеличенную зону поражения ловушки
                 Rectangle trapKillZone = new Rectangle(
-                    trap.X - 3,
-                    trap.Y - 7,
-                    trap.Width + 6,
-                    trap.Height + 10);
-
+                    trap.X - 3,                // Немного расширяем зону влево
+                    trap.Y - 7,                // Поднимаем зону вверх
+                    trap.Width + 6,            // Расширяем по ширине
+                    trap.Height + 10);         // Увеличиваем по высоте
+                // Если границы игрока пересекаются с зоной поражения ловушки
                 if (playerBounds.IntersectsWith(trapKillZone))
                     return true;
             }
+            // Если ни с чем не столкнулись — возвращаем false
             return false;
         }
 
+
+        /// <summary>
+        /// Отрисовывает платформу с текстурой блоков.
+        /// Если платформа шире текстуры, используется заливка с повторяющимся узором.
+        /// </summary>
+        /// <param name="g">Контекст графики, на котором производится отрисовка.</param>
+        /// <param name="platform">Прямоугольник, представляющий платформу.</param>
         private void DrawTexturedPlatform(Graphics g, Rectangle platform)
         {
+            // Если ширина платформы больше ширины текстуры
             if (platform.Width > _blockTexture.Width)
             {
+                // Создаём кисть с текстурой и режимом повтора (tile)
                 using (var brush = new TextureBrush(_blockTexture, WrapMode.Tile))
                 {
+                    // Сдвигаем текстуру на позицию платформы
                     brush.TranslateTransform(platform.X, platform.Y);
+                    // Заполняем прямоугольник платформы текстурированной кистью
                     g.FillRectangle(brush, platform);
                 }
             }
             else
             {
+                // Если платформа уже или равна по ширине — рисуем обычную текстуру
                 g.DrawImage(_blockTexture, platform);
             }
         }
 
+        /// <summary>
+        /// Сбрасывает состояние уровня: камера и флаг завершения.
+        /// </summary>
         public void Reset()
         {
+            // Обнуляем смещение камеры
             CameraOffset = 0;
+            // Устанавливаем флаг завершения уровня в false
             IsLevelCompleted = false;
         }
     }

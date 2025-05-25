@@ -54,7 +54,6 @@
     <Compile Include="GameStates\FinalWinState.cs" />
     <Compile Include="GameStates\SettingsState.cs" />
     <Compile Include="GameStates\PauseState.cs" />
-    <Compile Include="GameStates\RulesState.cs" />
     <Compile Include="GameStates\LevelCompleteState.cs" />
     <Compile Include="GameStates\GameOverState.cs" />
     <Compile Include="GameStates\LevelsState.cs" />

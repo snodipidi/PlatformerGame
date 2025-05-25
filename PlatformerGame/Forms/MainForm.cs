@@ -119,10 +119,6 @@ namespace PlatformerGame.Forms
             ChangeState(new LevelsState(this, _levelManager));
         }
 
-        public void ShowRules()
-        {
-            ChangeState(new RulesState(this));
-        }
 
         public void ChangeState(IGameState newState)
         {

@@ -24,7 +24,6 @@ namespace PlatformerGame.GameObjects
         {
             // Инициализация таймера с указанным интервалом
             timer = new Timer { Interval = interval };
-
             // Подписка на событие Tick с вызовом события Update
             timer.Tick += (s, e) => Update?.Invoke();
         }

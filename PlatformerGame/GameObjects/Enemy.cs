@@ -12,25 +12,18 @@ namespace PlatformerGame.GameObjects
         /// Границы врага (позиция и размер)
         /// </summary>
         public Rectangle Bounds { get; private set; }
-
         // Максимальная дистанция перемещения от начальной позиции
         private readonly int _moveRange;
-
         // Скорость перемещения врага (пикселей за кадр)
         private readonly int _speed;
-
         // Направление движения (1 - вправо, -1 - влево)
         private int _direction = 1;
-
         // Исходная X-координата позиции врага
         private readonly int _originalX;
-
         // Спрайт для отрисовки врага
         private Bitmap _sprite;
-
         // Ширина врага после масштабирования
         private const int Width = 45;
-
         // Высота врага после масштабирования
         private const int Height = 70;
 
@@ -53,10 +46,8 @@ namespace PlatformerGame.GameObjects
                 // Если загрузка не удалась, используем null
                 _sprite = null;
             }
-
             // Устанавливаем начальную позицию (над платформой)
             Bounds = new Rectangle(x, platformTopY - Height, Width, Height);
-
             // Сохраняем параметры движения
             _moveRange = moveRange;
             _speed = speed;
@@ -70,17 +61,14 @@ namespace PlatformerGame.GameObjects
         {
             // Вычисляем новую позицию по X
             int newX = Bounds.X + _speed * _direction;
-
             // Проверяем достижение границ движения
             if (newX > _originalX + _moveRange || newX < _originalX)
             {
                 // Меняем направление движения
                 _direction *= -1;
-
                 // Корректируем позицию
                 newX = Bounds.X + _speed * _direction;
             }
-
             // Обновляем границы врага
             Bounds = new Rectangle(newX, Bounds.Y, Width, Height);
         }
@@ -97,13 +85,10 @@ namespace PlatformerGame.GameObjects
                 g.FillRectangle(Brushes.Red, Bounds);
                 return;
             }
-
             // Сохраняем текущий режим интерполяции
             var oldMode = g.InterpolationMode;
-
             // Устанавливаем режим NearestNeighbor для сохранения пиксельности
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
-
             // Если враг движется влево, отражаем спрайт
             if (_direction < 0)
             {
