@@ -16,7 +16,6 @@ public interface IGameState
     /// </summary>
     /// <remarks>
     /// Вызывается каждый кадр перед отрисовкой.
-    /// Здесь должна находиться основная игровая логика состояния.
     /// </remarks>
     void Update();
 
@@ -26,7 +25,7 @@ public interface IGameState
     /// <param name="g">Объект Graphics для отрисовки</param>
     /// <remarks>
     /// Вызывается каждый кадр после Update().
-    /// Все графические операции должны выполняться здесь.
+    /// Все графические операции выполняются здесь.
     /// </remarks>
     void Draw(Graphics g);
 
@@ -36,7 +35,6 @@ public interface IGameState
     /// <param name="e">Аргументы события клавиши</param>
     /// <remarks>
     /// Вызывается при нажатии клавиш.
-    /// Обрабатывает только KeyDown события.
     /// </remarks>
     void HandleInput(KeyEventArgs e);
 

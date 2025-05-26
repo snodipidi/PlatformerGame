@@ -16,43 +16,30 @@ namespace PlatformerGame.GameObjects
         // Ширина и высота игрока в пикселях
         private const int Width = 29;
         private const int Height = 41;
-
         // Текущий спрайт стоящего игрока
         private Bitmap _standingSprite;
-
         // Спрайт анимации ходьбы
         private Bitmap _walkingSprite;
-
         // Флаг показа анимационного спрайта
         private bool _showWalkingSprite = false;
-
         // Счётчик кадров для смены спрайта
         private int _animationCounter = 0;
-
         // Задержка между кадрами анимации
         private const int AnimationDelay = 10;
-
         // Уровень, в котором находится игрок
         private Level _level;
-
         // Текущая позиция игрока
         public PointF Position { get; private set; }
-
         // Флаг движения влево
         public bool IsMovingLeft { get; private set; }
-
         // Флаг движения вправо
         public bool IsMovingRight { get; private set; }
-
         // Скорость перемещения по горизонтали
         private const float Speed = 5;
-
         // Вертикальная скорость (гравитация, прыжок)
         private float _verticalVelocity = 0;
-
         // Константа силы гравитации
         private const float Gravity = 0.5f;
-
         // Сила прыжка
         private const float JumpForce = 12f;
 
@@ -69,7 +56,6 @@ namespace PlatformerGame.GameObjects
         public Player(Rectangle startPlatform, Level level)
         {
             _level = level; // Сохраняем ссылку на уровень
-
             try
             {
                 // Загружаем спрайты игрока
@@ -80,7 +66,6 @@ namespace PlatformerGame.GameObjects
             {
                 // Игнорируем ошибки загрузки (например, если файл не найден)
             }
-
             // Устанавливаем стартовую позицию
             Reset(startPlatform);
         }
@@ -108,22 +93,18 @@ namespace PlatformerGame.GameObjects
             // Получаем все платформы (в том числе движущиеся)
             var allPlatforms = new List<Rectangle>(_level.Platforms);
             allPlatforms.AddRange(_level.MovingPlatforms.Select(mp => mp.Bounds));
-
             // Вычисляем новое положение игрока
             Position = new PointF(
                 Position.X + (IsMovingLeft ? -Speed : IsMovingRight ? Speed : 0),
                 Position.Y + _verticalVelocity);
-
             // Применяем гравитацию
             _verticalVelocity += Gravity;
-
             // Прямоугольник ног игрока (для проверки соприкосновения с платформами)
             var feet = new RectangleF(
                 Position.X + 5,
                 Position.Y + Height,
                 Width - 10,
                 1);
-
             // Проверка соприкосновения с платформами
             foreach (var platform in allPlatforms)
             {
@@ -135,7 +116,6 @@ namespace PlatformerGame.GameObjects
                     break;
                 }
             }
-
             // Логика анимации при движении
             if (IsMovingLeft || IsMovingRight)
             {
@@ -160,10 +140,8 @@ namespace PlatformerGame.GameObjects
         {
             // Выбираем текущий спрайт
             Bitmap currentSprite = _showWalkingSprite ? _walkingSprite : _standingSprite;
-
             // Если спрайт не загружен — ничего не рисуем
             if (currentSprite == null) return;
-
             if (IsMovingLeft)
             {
                 // Отражаем изображение по горизонтали при движении влево

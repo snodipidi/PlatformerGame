@@ -160,19 +160,14 @@ namespace PlatformerGame.GameObjects
         {
             // В режиме разработчика всегда возвращаем 100%
             if (SoundManager.DeveloperMode) return 1f;
-
             // Общее количество уровней
             int totalLevels = _levels.Count;
-
             // Если уровней нет — возвращаем 0
             if (totalLevels <= 1) return 0f;
-
             // Считаем количество пройденных уровней (разблокированных минус 1 текущий)
             int passedLevels = _levels.Count(l => !l.IsLocked) - 1;
-
             // Не допускаем отрицательного значения
             passedLevels = Math.Max(passedLevels, 0);
-
             // Вычисляем и возвращаем прогресс
             return (float)passedLevels / (totalLevels - 1);
         }
@@ -214,10 +209,8 @@ namespace PlatformerGame.GameObjects
         {
             // В режиме разработчика — пропускаем
             if (SoundManager.DeveloperMode) return;
-
             // Получаем индекс следующего уровня
             int nextIndex = _currentLevelIndex + 1;
-
             // Если он существует — разблокируем
             if (nextIndex < _levels.Count)
             {
@@ -233,7 +226,6 @@ namespace PlatformerGame.GameObjects
             // В режиме разработчика — просто проверяем индекс
             if (SoundManager.DeveloperMode)
                 return _currentLevelIndex + 1 < _levels.Count;
-
             // Иначе — проверяем, что следующий уровень не выходит за лимит
             return _currentLevelIndex + 1 < _levels.Count
                 && _levels[_currentLevelIndex + 1].LevelNumber <= 5;

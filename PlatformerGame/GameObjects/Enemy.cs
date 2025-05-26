@@ -105,7 +105,6 @@ namespace PlatformerGame.GameObjects
                     new Rectangle(0, 0, _sprite.Width, _sprite.Height),
                     GraphicsUnit.Pixel);
             }
-
             // Восстанавливаем исходный режим интерполяции
             g.InterpolationMode = oldMode;
         }

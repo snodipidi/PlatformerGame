@@ -11,7 +11,7 @@ namespace PlatformerGame.GameObjects
     public class LevelData
     {
         /// <summary>
-        /// Номер уровня в последовательности (например, 1, 2, 3 и т.д.).
+        /// Номер уровня в последовательности.
         /// </summary>
         public int LevelNumber { get; set; }
 

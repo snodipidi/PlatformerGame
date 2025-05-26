@@ -20,10 +20,8 @@ namespace PlatformerGame.GameStates
 
         // Прямоугольник кнопки "Выход"
         private Rectangle _exitButton;
-
         // Фаза анимации для фонового градиента и конфетти
         private float _animationPhase;
-
         // Изображение победы
         private readonly Bitmap _victoryImage;
 
@@ -220,19 +218,30 @@ namespace PlatformerGame.GameStates
                 300, 50);
         }
 
-        // Метод для создания закруглённых прямоугольников
+        /// <summary>
+        /// Создаёт путь для закруглённого прямоугольника с заданным радиусом скругления.
+        /// </summary>
+        /// <param name="bounds">Прямоугольная область.</param>
+        /// <param name="radius">Радиус скругления углов.</param>
+        /// <returns>Путь GraphicsPath с закруглёнными углами.</returns>
         private GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
+            // Создаём новый графический путь
             var path = new GraphicsPath();
+            // Диаметр скругления
             int diameter = radius * 2;
-
+            // Верхний левый угол
             path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
+            // Верхний правый угол
             path.AddArc(bounds.X + bounds.Width - diameter, bounds.Y, diameter, diameter, 270, 90);
+            // Нижний правый угол
             path.AddArc(bounds.X + bounds.Width - diameter, bounds.Y + bounds.Height - diameter,
-                       diameter, diameter, 0, 90);
+                        diameter, diameter, 0, 90);
+            // Нижний левый угол
             path.AddArc(bounds.X, bounds.Y + bounds.Height - diameter, diameter, diameter, 90, 90);
+            // Замыкаем фигуру
             path.CloseFigure();
-
+            // Возвращаем готовый путь
             return path;
         }
     }

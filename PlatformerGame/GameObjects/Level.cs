@@ -362,7 +362,7 @@ namespace PlatformerGame.GameObjects
                     columnX, groundY - 180,
                     30, 150, 120, 2));
 
-                // 6. ★ Новая ловушка после колонны ★
+                // 6. Новая ловушка после колонны
                 Platforms.Add(new Rectangle(columnX + 250, groundY - 120, 200, platformHeight));
                 Traps.Add(new Rectangle(
                     columnX + 250 + 50, // Центр платформы
@@ -379,38 +379,61 @@ namespace PlatformerGame.GameObjects
             }
         }
 
+        /// <summary>
+        /// Генерирует одну платформу на уровне с учётом сложности.
+        /// </summary>
+        /// <param name="difficulty">Уровень сложности, влияющий на расстояния и размеры платформ.</param>
         private void GeneratePlatform(int difficulty)
         {
+            // Случайная ширина платформы, уменьшается с ростом сложности
             int width = random.Next(80, 150 - difficulty * 10);
+            // Случайное расстояние до следующей платформы, уменьшается с ростом сложности
             int x = lastPlatformX + random.Next(100, 250 - difficulty * 20);
+            // Случайная вертикальная позиция платформы
             int y = random.Next(screenSize.Height / 2, screenSize.Height - 50);
-
+            // Добавляем новую платформу в список
             Platforms.Add(new Rectangle(x, y, width, 20));
+            // Обновляем позицию последней платформы
             lastPlatformX = x + width;
         }
 
+        /// <summary>
+        /// Генерирует финальную платформу и несколько прыжковых перед финишем.
+        /// </summary>
+        /// <param name="difficulty">Уровень сложности, не влияет на финальные платформы, но требуется для совместимости.</param>
         private void GenerateFinalPlatforms(int difficulty)
         {
-            // Большая финальная платформа
+            // Задаём ширину финальной платформы
             int finalPlatformWidth = 200;
+            // Вычисляем её горизонтальную позицию — у самого конца уровня
             int finalPlatformX = TotalLength - finalPlatformWidth;
+            // Задаём вертикальную позицию финальной платформы
             int finalPlatformY = screenSize.Height - 120;
+            // Добавляем финальную платформу
             Platforms.Add(new Rectangle(finalPlatformX, finalPlatformY, finalPlatformWidth, 20));
-
-            // Несколько маленьких платформ перед финишем
+            // Генерируем 3 небольших платформы перед финишем
             for (int i = 1; i <= 3; i++)
             {
+                // Вычисляем X-координату платформы — слева от финишной
                 int x = finalPlatformX - 150 * i;
+                // Поочередно приподнимаем каждую вторую платформу выше
                 int y = finalPlatformY - (i % 2 == 0 ? 50 : 0);
+                // Добавляем маленькую платформу
                 Platforms.Add(new Rectangle(x, y, 80, 15));
             }
-
+            // Обновляем позицию последней платформы
             lastPlatformX = TotalLength;
         }
 
+
+        /// <summary>
+        /// Создаёт финишный флаг на последней платформе.
+        /// </summary>
         private void CreateFinishFlag()
         {
+            // Получаем последнюю платформу из списка
             var lastPlatform = Platforms[Platforms.Count - 1];
+            // Создаём прямоугольник финишного флага чуть правее и выше платформы
             FinishFlag = new Rectangle(
                 lastPlatform.Right - 25,
                 lastPlatform.Y - 60,
@@ -418,36 +441,59 @@ namespace PlatformerGame.GameObjects
                 60);
         }
 
+        /// <summary>
+        /// Обновляет смещение камеры и обновляет врагов и платформы.
+        /// </summary>
+        /// <param name="playerX">Позиция игрока по оси X.</param>
         public void Update(float playerX)
         {
+            // Вычисляем смещение камеры, чтобы игрок был ближе к левому краю
             CameraOffset = (int)(playerX - screenSize.Width / 3);
+            // Ограничиваем смещение, чтобы не выйти за пределы уровня
             int maxOffset = TotalLength - screenSize.Width;
             CameraOffset = Math.Min(maxOffset, Math.Max(0, CameraOffset));
+            // Обновляем обычных врагов
             foreach (var enemy in Enemies)
             {
                 enemy.Update();
             }
+            // Обновляем врагов, привязанных к колоннам
             foreach (var enemy in ColumnEnemies)
             {
                 enemy.Update();
             }
+            // Обновляем движущиеся платформы
             foreach (var platform in MovingPlatforms)
             {
                 platform.Update();
             }
         }
 
+
+        /// <summary>
+        /// Проверяет, достиг ли игрок финишного флага и завершает уровень.
+        /// </summary>
+        /// <param name="player">Игрок, чьё положение проверяется.</param>
         public void CheckCompletion(Player player)
         {
+            // Если уровень ещё не завершён и игрок касается финишного флага
             if (!IsLevelCompleted && player.GetBounds().IntersectsWith(FinishFlag))
             {
+                // Устанавливаем флаг завершения уровня
                 IsLevelCompleted = true;
+
+                // Печатаем сообщение в отладку
                 Debug.WriteLine("Уровень пройден!");
             }
         }
 
+        /// <summary>
+        /// Отрисовывает все элементы уровня.
+        /// </summary>
+        /// <param name="g">Поверхность для рисования.</param>
         public void Draw(Graphics g)
         {
+            // Если есть текстура блока, отрисовываем платформы с ней
             if (_blockTexture != null)
             {
                 foreach (var platform in Platforms)
@@ -455,6 +501,7 @@ namespace PlatformerGame.GameObjects
                     DrawTexturedPlatform(g, platform);
                 }
             }
+            // Иначе закрашиваем платформы зелёным цветом
             else
             {
                 foreach (var platform in Platforms)
@@ -462,7 +509,7 @@ namespace PlatformerGame.GameObjects
                     g.FillRectangle(Brushes.Green, platform);
                 }
             }
-
+            // Рисуем финишный флаг: либо текстуру, либо красный прямоугольник
             if (_finishFlagTexture != null)
             {
                 g.DrawImage(_finishFlagTexture, FinishFlag);
@@ -472,44 +519,49 @@ namespace PlatformerGame.GameObjects
                 g.FillRectangle(Brushes.Red, FinishFlag);
                 g.DrawRectangle(Pens.DarkRed, FinishFlag);
             }
-
-            // После отрисовки платформ:
+            // Отрисовываем ловушки в виде треугольников (шипов)
             foreach (var trap in Traps)
             {
-                int spikeCount = trap.Width / 20; // По шипу каждые 20px
+                // Вычисляем количество шипов
+                int spikeCount = trap.Width / 20;
                 int spikeWidth = trap.Width / spikeCount;
-
                 using (var spikeBrush = new SolidBrush(Color.DarkRed))
                 {
                     for (int i = 0; i < spikeCount; i++)
                     {
+                        // Создаём координаты треугольного шипа
                         Point[] spike = {
-                        new Point(trap.X + i * spikeWidth, trap.Bottom),
-                        new Point(trap.X + (i + 1) * spikeWidth, trap.Bottom),
-                        new Point(trap.X + i * spikeWidth + spikeWidth/2, trap.Top)
+                            new Point(trap.X + i * spikeWidth, trap.Bottom),
+                            new Point(trap.X + (i + 1) * spikeWidth, trap.Bottom),
+                            new Point(trap.X + i * spikeWidth + spikeWidth / 2, trap.Top)
                         };
+                        // Рисуем шип
                         g.FillPolygon(spikeBrush, spike);
                     }
                 }
-                foreach (var platform in MovingPlatforms)
-                {
-                    platform.Draw(g);
-                }
             }
-
+            // Отрисовываем движущиеся платформы
+            foreach (var platform in MovingPlatforms)
+            {
+                platform.Draw(g);
+            }
+            // Отрисовываем обычных врагов
             foreach (var enemy in Enemies)
             {
                 enemy.Draw(g);
             }
+            // Отрисовываем врагов, привязанных к колоннам
             foreach (var enemy in ColumnEnemies)
             {
                 enemy.Draw(g);
             }
+            // Повторная отрисовка движущихся платформ (возможно, дублирование — можно удалить)
             foreach (var platform in MovingPlatforms)
             {
-                platform.Draw(g); 
+                platform.Draw(g);
             }
         }
+
 
         /// <summary>
         /// Проверяет, сталкивается ли игрок с врагами (обычными или колоннами) либо с ловушками.

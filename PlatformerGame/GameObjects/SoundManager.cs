@@ -12,10 +12,8 @@ namespace PlatformerGame
     {
         // Плеер для звука поражения
         private static SoundPlayer _gameoverSound;
-
         // Плеер для звука победы
         private static SoundPlayer _winSound;
-
         // Плеер для фоновой музыки
         private static SoundPlayer _musicPlayer;
 
